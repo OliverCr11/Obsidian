@@ -2,6 +2,7 @@ import { ShoppingCart, User, Menu, X } from 'lucide-react';
 import { useState } from 'react';
 import type { Lang } from '../types';
 import { t } from '../i18n/translations';
+import { useCart } from '../context/CartContext';
 
 interface NavbarProps {
   lang: Lang;
@@ -10,6 +11,7 @@ interface NavbarProps {
 
 export default function Navbar({ lang, onToggleLang }: NavbarProps) {
   const [mobileOpen, setMobileOpen] = useState<boolean>(false);
+  const { toggleCart, totalItems } = useCart();
 
   const navLinks = [
     { key: 'nav.drop', href: '#drop' },
@@ -67,15 +69,18 @@ export default function Navbar({ lang, onToggleLang }: NavbarProps) {
             <User size={18} strokeWidth={1.5} />
           </button>
 
-          {/* Cart Icon with badge */}
+          {/* Cart Icon with dynamic badge */}
           <button
+            onClick={toggleCart}
             className="relative p-2 rounded-full text-zinc-400 hover:text-white hover:bg-zinc-800/60 transition-colors"
             aria-label="Shopping cart"
           >
             <ShoppingCart size={18} strokeWidth={1.5} />
-            <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-kevin-base rounded-full flex items-center justify-center text-[9px] font-bold text-white">
-              1
-            </span>
+            {totalItems > 0 && (
+              <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-kevin-base rounded-full flex items-center justify-center text-[9px] font-bold text-white">
+                {totalItems > 9 ? '9+' : totalItems}
+              </span>
+            )}
           </button>
 
           {/* Mobile menu toggle */}
