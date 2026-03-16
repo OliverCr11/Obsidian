@@ -7,9 +7,10 @@ import { useCart } from '../context/CartContext';
 interface NavbarProps {
   lang: Lang;
   onToggleLang: () => void;
+  onOpenAuth: () => void;
 }
 
-export default function Navbar({ lang, onToggleLang }: NavbarProps) {
+export default function Navbar({ lang, onToggleLang, onOpenAuth }: NavbarProps) {
   const [mobileOpen, setMobileOpen] = useState<boolean>(false);
   const { toggleCart, totalItems } = useCart();
 
@@ -61,8 +62,9 @@ export default function Navbar({ lang, onToggleLang }: NavbarProps) {
             <span className={lang === 'en' ? 'text-white' : 'text-zinc-500'}>EN</span>
           </button>
 
-          {/* User Icon */}
+          {/* User Icon → opens Auth */}
           <button
+            onClick={onOpenAuth}
             className="p-2 rounded-full text-zinc-400 hover:text-white hover:bg-zinc-800/60 transition-colors"
             aria-label="User profile"
           >
