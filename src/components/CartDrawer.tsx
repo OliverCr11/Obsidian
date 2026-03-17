@@ -6,6 +6,7 @@ import type { Lang } from '../types';
 
 interface CartDrawerProps {
   lang: Lang;
+  onCheckout?: () => void;
 }
 
 // ─── Animation Variants ───────────────────────────────────────────────────────
@@ -43,7 +44,7 @@ const itemVariants: Variants = {
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export default function CartDrawer({ lang }: CartDrawerProps) {
+export default function CartDrawer({ lang, onCheckout }: CartDrawerProps) {
   const isOpen = useCartStore((s) => s.isOpen);
   const items = useCartStore((s) => s.cartItems);
   const closeCart = useCartStore((s) => s.closeCart);
@@ -252,6 +253,10 @@ export default function CartDrawer({ lang }: CartDrawerProps) {
 
                 {/* Checkout CTA */}
                 <button
+                  onClick={() => {
+                    closeCart();
+                    if (onCheckout) onCheckout();
+                  }}
                   className="w-full py-4 rounded-lg font-black text-sm tracking-[0.12em] uppercase text-white transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
                   style={{
                     background: 'linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%)',

@@ -7,10 +7,11 @@ import Footer from './components/Footer';
 import CartDrawer from './components/CartDrawer';
 import AuthPage from './pages/AuthPage';
 import UserDashboard from './pages/UserDashboard';
+import Checkout from './pages/Checkout';
 import type { Lang } from './types';
 import './index.css';
 
-type Page = 'home' | 'auth' | 'dashboard';
+type Page = 'home' | 'auth' | 'dashboard' | 'checkout';
 
 const pageTransition = {
   initial:  { opacity: 0 },
@@ -32,6 +33,14 @@ export default function App() {
             lang={lang} 
             onBack={() => setPage('home')} 
             onLogout={() => setPage('home')} 
+          />
+        </motion.div>
+      ) : page === 'checkout' ? (
+        <motion.div key="checkout" {...pageTransition} className="w-full">
+          <Checkout 
+            lang={lang} 
+            onBack={() => setPage('home')} 
+            onSuccess={() => setPage('dashboard')} 
           />
         </motion.div>
       ) : page === 'auth' ? (
@@ -58,7 +67,10 @@ export default function App() {
             <Footer lang={lang} />
 
             {/* Cart Drawer — rendered at root so it overlays everything */}
-            <CartDrawer lang={lang} />
+            <CartDrawer 
+              lang={lang} 
+              onCheckout={() => setPage('checkout')} 
+            />
           </div>
         </motion.div>
       )}
