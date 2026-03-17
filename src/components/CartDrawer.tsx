@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { motion, AnimatePresence, type Variants } from 'framer-motion';
 import { X, Plus, Minus, Trash2, ShoppingBag } from 'lucide-react';
-import { useCart } from '../context/CartContext';
+import { useCartStore } from '../store/useCartStore';
 import type { Lang } from '../types';
 
 interface CartDrawerProps {
@@ -44,8 +44,13 @@ const itemVariants: Variants = {
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function CartDrawer({ lang }: CartDrawerProps) {
-  const { state, closeCart, removeItem, increment, decrement, subtotal, totalItems } = useCart();
-  const { isOpen, items } = state;
+  const isOpen = useCartStore((s) => s.isOpen);
+  const items = useCartStore((s) => s.cartItems);
+  const closeCart = useCartStore((s) => s.closeCart);
+  const removeItem = useCartStore((s) => s.removeItem);
+  const updateQuantity = useCartStore((s) => s.updateQuantity);
+  const subtotal = useCartStore((s) => s.totalPrice());
+  const totalItems = useCartStore((s) => s.totalItems());
 
   // Lock body scroll when drawer is open
   useEffect(() => {
@@ -163,9 +168,9 @@ export default function CartDrawer({ lang }: CartDrawerProps) {
                       className="group relative flex gap-4 p-4 rounded-xl bg-zinc-900/60 border border-zinc-800/50 hover:border-zinc-700/60 transition-colors"
                     >
                       {/* Thumbnail */}
-                      <div className="w-20 h-20 shrink-0 rounded-lg overflow-hidden bg-zinc-800 border border-zinc-700/40">
+                        <div className="w-20 h-20 shrink-0 rounded-lg overflow-hidden bg-zinc-800 border border-zinc-700/40">
                         <img
-                          src={item.imageUrl}
+                          src={item.image}
                           alt={lang === 'es' ? item.nameEs : item.name}
                           className="w-full h-full object-cover"
                         />
@@ -187,7 +192,7 @@ export default function CartDrawer({ lang }: CartDrawerProps) {
                           {/* Quantity Controls */}
                           <div className="flex items-center gap-2 bg-zinc-800/80 border border-zinc-700/50 rounded-lg px-1 py-0.5">
                             <button
-                              onClick={() => decrement(item.id)}
+                              onClick={() => updateQuantity(item.id, item.quantity - 1)}
                               className="w-7 h-7 flex items-center justify-center text-zinc-400 hover:text-white transition-colors"
                               aria-label="Decrease quantity"
                             >
@@ -197,7 +202,7 @@ export default function CartDrawer({ lang }: CartDrawerProps) {
                               {item.quantity}
                             </span>
                             <button
-                              onClick={() => increment(item.id)}
+                              onClick={() => updateQuantity(item.id, item.quantity + 1)}
                               className="w-7 h-7 flex items-center justify-center text-zinc-400 hover:text-white transition-colors"
                               aria-label="Increase quantity"
                             >

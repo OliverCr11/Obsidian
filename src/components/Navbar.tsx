@@ -2,7 +2,7 @@ import { ShoppingCart, User, Menu, X } from 'lucide-react';
 import { useState } from 'react';
 import type { Lang } from '../types';
 import { t } from '../i18n/translations';
-import { useCart } from '../context/CartContext';
+import { useCartStore } from '../store/useCartStore';
 
 interface NavbarProps {
   lang: Lang;
@@ -12,7 +12,8 @@ interface NavbarProps {
 
 export default function Navbar({ lang, onToggleLang, onOpenAuth }: NavbarProps) {
   const [mobileOpen, setMobileOpen] = useState<boolean>(false);
-  const { toggleCart, totalItems } = useCart();
+  const toggleCart = useCartStore((s) => s.toggleCart);
+  const totalItems = useCartStore((s) => s.totalItems());
 
   const navLinks = [
     { key: 'nav.drop', href: '#drop' },

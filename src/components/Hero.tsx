@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { ArrowRight } from 'lucide-react';
 import type { Lang, CountdownTime } from '../types';
 import { t } from '../i18n/translations';
+import { useCartStore } from '../store/useCartStore';
 
 interface HeroProps {
   lang: Lang;
@@ -44,6 +45,8 @@ function DigitBlock({ value, label }: DigitBlockProps) {
 
 export default function Hero({ lang }: HeroProps) {
   const [time, setTime] = useState<CountdownTime>(getTimeLeft);
+  const addItem = useCartStore((s) => s.addItem);
+  const openCart = useCartStore((s) => s.openCart);
 
   const tick = useCallback(() => {
     setTime(getTimeLeft());
@@ -147,6 +150,18 @@ export default function Hero({ lang }: HeroProps) {
             {/* CTA Button */}
             <div className="flex flex-col sm:flex-row gap-4 items-start">
               <button
+                onClick={() => {
+                  addItem({
+                    id: 'obd-glove-001-m',
+                    name: "Founder's Glove — Drop 001",
+                    nameEs: 'Guante Fundador — Lote 001',
+                    price: 120,
+                    image: '/images/hero_glove.png',
+                    size: 'M',
+                    variant: 'Talla M / Carbon Black',
+                  });
+                  openCart();
+                }}
                 className="btn-primary animate-pulse-glow flex items-center gap-2 text-sm"
                 aria-label="Pre-order gloves"
               >
