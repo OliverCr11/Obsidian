@@ -6,10 +6,11 @@ import Features from './components/Features';
 import Footer from './components/Footer';
 import CartDrawer from './components/CartDrawer';
 import AuthPage from './pages/AuthPage';
+import UserDashboard from './pages/UserDashboard';
 import type { Lang } from './types';
 import './index.css';
 
-type Page = 'home' | 'auth';
+type Page = 'home' | 'auth' | 'dashboard';
 
 const pageTransition = {
   initial:  { opacity: 0 },
@@ -25,7 +26,15 @@ export default function App() {
 
   return (
     <AnimatePresence mode="wait">
-      {page === 'auth' ? (
+      {page === 'dashboard' ? (
+        <motion.div key="dashboard" {...pageTransition} className="w-full">
+          <UserDashboard 
+            lang={lang} 
+            onBack={() => setPage('home')} 
+            onLogout={() => setPage('home')} 
+          />
+        </motion.div>
+      ) : page === 'auth' ? (
         <motion.div key="auth" {...pageTransition}>
           <AuthPage lang={lang} onBack={() => setPage('home')} />
         </motion.div>
@@ -38,7 +47,7 @@ export default function App() {
             <Navbar
               lang={lang}
               onToggleLang={handleToggleLang}
-              onOpenAuth={() => setPage('auth')}
+              onOpenAuth={() => setPage('dashboard')} /* Simulated logic: goes straight to dashboard for demo */
             />
 
             <main>
