@@ -1,4 +1,4 @@
-import { CreditCard, Truck, ShieldCheck, ChevronLeft } from 'lucide-react';
+import { CreditCard, Truck, ChevronLeft, Lock } from 'lucide-react';
 import { useCartStore } from '../store/useCartStore';
 import type { Lang } from '../types';
 
@@ -97,44 +97,94 @@ export default function Checkout({ lang, onBack, onSuccess }: CheckoutProps) {
 
             <div className="h-px bg-zinc-800/50" />
 
-            {/* Payment Method */}
+            {/* ─── PAYMENT SECTION (Stripe Redesign) ─── */}
             <div>
               <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
                 <span className="w-6 h-6 rounded-full bg-kevin-violet/20 flex items-center justify-center text-kevin-violet text-xs font-mono">3</span>
-                Payment Method
-                <CreditCard size={18} className="ml-auto text-zinc-500" />
+                Payment
               </h2>
-              
-              <div className="bg-zinc-900 border border-kevin-violet/50 rounded-xl p-4 relative overflow-hidden">
-                <div className="absolute top-0 right-0 p-4">
-                  <ShieldCheck size={24} className="text-emerald-500/50" />
+
+              {/* Express Checkout */}
+              <div className="space-y-4 mb-8">
+                <p className="text-xs font-medium text-zinc-400 uppercase tracking-wider text-center mb-3">
+                  Express Checkout
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <button type="button" className="w-full bg-white hover:bg-zinc-200 text-black h-12 rounded flex items-center justify-center transition-colors">
+                    {/* Apple Pay Logo (using text/css for demo) */}
+                    <span className="font-semibold text-lg flex items-center gap-1">
+                      <span className="text-xl"></span> Pay
+                    </span>
+                  </button>
+                  <button type="button" className="w-full bg-zinc-900 border border-zinc-700 hover:bg-zinc-800 text-white h-12 rounded flex items-center justify-center transition-colors relative overflow-hidden">
+                    <span className="font-semibold text-lg">G Pay</span>
+                  </button>
                 </div>
+              </div>
+
+              {/* Divider */}
+              <div className="relative flex items-center py-5">
+                <div className="flex-grow border-t border-zinc-800/50"></div>
+                <span className="flex-shrink-0 mx-4 text-zinc-500 text-xs uppercase tracking-wider font-medium">Or pay with card</span>
+                <div className="flex-grow border-t border-zinc-800/50"></div>
+              </div>
+              
+              {/* Stripe-like Unified Input */}
+              <div className="mt-4">
+                <label className="text-xs font-medium text-zinc-400 uppercase tracking-wider block mb-2">Card Information</label>
                 
-                <div className="space-y-4 relative z-10 w-full md:w-5/6">
-                  <div className="space-y-1">
-                    <label className="text-xs font-medium text-zinc-400 uppercase tracking-wider">Card Number</label>
-                    <div className="relative">
-                      <input type="text" required className="input-dark w-full font-mono pl-10" placeholder="0000 0000 0000 0000" />
-                      <CreditCard size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
+                <div className="bg-[#121214] border border-zinc-800/80 rounded-lg overflow-hidden flex flex-col focus-within:border-kevin-violet transition-colors">
+                  {/* Card Number */}
+                  <div className="relative flex items-center px-3 h-11 border-b border-zinc-800/80">
+                    <CreditCard size={18} className="text-zinc-500 mr-2" />
+                    <input 
+                      type="text" 
+                      required 
+                      className="w-full bg-transparent text-white font-mono text-sm outline-none placeholder:text-zinc-600" 
+                      placeholder="Card number" 
+                    />
+                    <div className="flex gap-1 ml-2">
+                      <div className="w-8 h-5 bg-zinc-800 rounded rounded-sm flex items-center justify-center text-[8px] font-bold text-zinc-400">VISA</div>
+                      <div className="w-8 h-5 bg-zinc-800 rounded rounded-sm flex items-center justify-center text-[8px] font-bold text-zinc-400">MC</div>
                     </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
-                     <div className="space-y-1">
-                      <label className="text-xs font-medium text-zinc-400 uppercase tracking-wider">Expiry (MM/YY)</label>
-                      <input type="text" required className="input-dark w-full font-mono" placeholder="12/26" />
+                  
+                  {/* Expiry & CVC */}
+                  <div className="flex bg-[#121214]">
+                    <div className="relative flex items-center px-4 h-11 border-r border-zinc-800/80 flex-1">
+                      <input 
+                        type="text" 
+                        required 
+                        className="w-full bg-transparent text-white font-mono text-sm outline-none placeholder:text-zinc-600" 
+                        placeholder="MM / YY" 
+                      />
                     </div>
-                    <div className="space-y-1">
-                      <label className="text-xs font-medium text-zinc-400 uppercase tracking-wider">CVC</label>
-                      <input type="text" required className="input-dark w-full font-mono" placeholder="123" />
+                    <div className="relative flex items-center px-4 h-11 flex-1">
+                      <input 
+                        type="text" 
+                        required 
+                        className="w-full bg-transparent text-white font-mono text-sm outline-none placeholder:text-zinc-600" 
+                        placeholder="CVC" 
+                      />
                     </div>
+                  </div>
+                </div>
+
+                <div className="flex justify-between items-center mt-3">
+                  <div className="flex items-center gap-1.5 text-zinc-500 text-xs">
+                    <Lock size={12} />
+                    <span>Secured by Stripe</span>
+                  </div>
+                  <div className="text-[10px] text-zinc-600 font-mono">
+                    TEST MODE
                   </div>
                 </div>
               </div>
             </div>
 
-            <button type="submit" className="btn-primary w-full py-4 text-base font-bold animate-pulse-glow flex items-center justify-center gap-2 mt-8">
-              <ShieldCheck size={20} />
-              PAY NOW — ${total.toFixed(2)}
+            {/* Submit Button */}
+            <button type="submit" className="btn-primary w-full py-4 text-base font-bold animate-pulse-glow mt-8">
+              PAY ${total.toFixed(2)} USD
             </button>
 
           </form>
