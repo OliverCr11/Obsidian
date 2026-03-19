@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { ArrowRight, ShieldCheck } from 'lucide-react';
 import type { Lang, CountdownTime } from '../types';
 import { useCartStore } from '../store/useCartStore';
+import { t } from '../i18n/translations';
 
 interface HeroProps {
   lang: Lang;
@@ -95,10 +96,10 @@ export default function Hero({ lang }: HeroProps) {
               <div className="flex items-center gap-3">
                 <span className="badge-glow inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-[10px] font-bold tracking-[0.2em] text-emerald-400 uppercase border border-emerald-500/30 bg-emerald-500/10 shadow-[0_0_10px_rgba(52,211,153,0.2)]">
                   <ShieldCheck size={14} />
-                  DROP 001 ACTIVE
+                  {t(lang, 'hero.badge.active')}
                 </span>
                 <span className="text-zinc-600 text-xs font-mono tracking-widest uppercase">
-                  Verified Authentic
+                  {t(lang, 'hero.badge.verified')}
                 </span>
               </div>
 
@@ -107,28 +108,28 @@ export default function Hero({ lang }: HeroProps) {
                 className="text-5xl sm:text-6xl md:text-7xl font-black leading-[1.05] tracking-tighter text-white uppercase"
                 style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
               >
-                THE SECOND SKIN.<br />
+                {t(lang, 'hero.h1.part1')}<br />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-white to-zinc-500">
-                  LOT 001.
+                  {t(lang, 'hero.h1.part2')}
                 </span>
               </h1>
 
               {/* Subtitle */}
               <p className="text-zinc-400 text-lg md:text-xl leading-relaxed max-w-lg font-light">
-                Dark luxury meets urban utility. The Founder's Drop is here. 
-                <span className="text-white font-medium ml-1">Strictly limited to 50 pairs.</span>
+                {t(lang, 'hero.subtitle.main')} 
+                <span className="text-white font-medium ml-1">{t(lang, 'hero.subtitle.highlight')}</span>
               </p>
             </div>
 
             {/* ─── Neon Countdown Timer ─── */}
             <div className="flex items-center gap-2 sm:gap-4 mt-2">
-              <DigitBlock value={time.days} label={lang === 'es' ? 'DÍAS' : 'DAYS'} />
+              <DigitBlock value={time.days} label={t(lang, 'hero.countdown.days')} />
               <span className="text-kevin-violet font-mono text-3xl font-thin pb-6 animate-pulse">:</span>
-              <DigitBlock value={time.hours} label={lang === 'es' ? 'HORAS' : 'HOURS'} />
+              <DigitBlock value={time.hours} label={t(lang, 'hero.countdown.hours')} />
               <span className="text-kevin-violet font-mono text-3xl font-thin pb-6 animate-pulse">:</span>
-              <DigitBlock value={time.minutes} label={lang === 'es' ? 'MINS' : 'MINS'} />
+              <DigitBlock value={time.minutes} label={t(lang, 'hero.countdown.mins')} />
               <span className="text-kevin-violet font-mono text-3xl font-thin pb-6 animate-pulse">:</span>
-              <DigitBlock value={time.seconds} label={lang === 'es' ? 'SEGS' : 'SECS'} />
+              <DigitBlock value={time.seconds} label={t(lang, 'hero.countdown.secs')} />
             </div>
 
             {/* CTA Button */}
@@ -148,7 +149,7 @@ export default function Hero({ lang }: HeroProps) {
                 }}
                 className="btn-primary animate-pulse-glow flex items-center gap-3 px-10 py-5 text-base font-bold uppercase tracking-[0.2em] w-full sm:w-auto justify-center bg-white text-black hover:bg-zinc-200 transition-colors rounded"
               >
-                {lang === 'es' ? 'Pre-ordenar Ahora' : 'PRE-ORDER NOW'}
+                {t(lang, 'hero.cta.preorder')}
                 <ArrowRight size={20} strokeWidth={2} />
               </button>
             </div>
@@ -184,15 +185,15 @@ export default function Hero({ lang }: HeroProps) {
             <div className="absolute top-10 left-0 md:left-10 glass rounded-lg px-4 py-2 border border-emerald-500/30">
               <span className="text-white text-[10px] font-mono font-bold tracking-[0.2em] uppercase flex items-center gap-2">
                 <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
-                1 of 50
+                {t(lang, 'hero.limit.badge')}
               </span>
             </div>
 
             {/* Tagline floating bottom right */}
             <div className="absolute bottom-10 right-0 md:right-10 glass rounded-lg px-5 py-3 border border-zinc-800 backdrop-blur-md">
               <p className="text-zinc-400 text-[10px] font-mono tracking-widest uppercase">
-                Obsidian Core Div. <br />
-                <span className="text-kevin-violet font-bold">Absolute Leather.</span>
+                {t(lang, 'hero.tagline.div')} <br />
+                <span className="text-kevin-violet font-bold">{t(lang, 'hero.tagline.leather')}</span>
               </p>
             </div>
           </div>
