@@ -1,87 +1,50 @@
-import { useEffect, useState, useCallback } from 'react';
-import { ArrowRight } from 'lucide-react';
-import type { Lang, CountdownTime } from '../types';
-import { t } from '../i18n/translations';
+import { ArrowRight, Wind, Fingerprint, Lock, ShieldCheck } from 'lucide-react';
+import type { Lang } from '../types';
 import { useCartStore } from '../store/useCartStore';
 
 interface HeroProps {
   lang: Lang;
 }
 
-// Target date: 2 days, 14 hours, 35 mins, 59 secs from 2026-03-16T16:06:35
-const TARGET_DATE = new Date('2026-03-18T06:42:34-04:00').getTime();
-
-function getTimeLeft(): CountdownTime {
-  const now = Date.now();
-  const diff = Math.max(0, TARGET_DATE - now);
-  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-  const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-  const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-  return { days, hours, minutes, seconds };
-}
-
-function pad(n: number): string {
-  return n.toString().padStart(2, '0');
-}
-
-interface DigitBlockProps {
-  value: number;
-  label: string;
-}
-
-function DigitBlock({ value, label }: DigitBlockProps) {
-  return (
-    <div className="flex flex-col items-center gap-1">
-      <span className="countdown-digit text-2xl sm:text-3xl md:text-4xl lg:text-5xl">
-        {pad(value)}
-      </span>
-      <span className="text-[10px] sm:text-xs font-mono text-zinc-500 tracking-widest uppercase">
-        {label}
-      </span>
-    </div>
-  );
-}
-
 export default function Hero({ lang }: HeroProps) {
-  const [time, setTime] = useState<CountdownTime>(getTimeLeft);
   const addItem = useCartStore((s) => s.addItem);
   const openCart = useCartStore((s) => s.openCart);
 
-  const tick = useCallback(() => {
-    setTime(getTimeLeft());
-  }, []);
-
-  useEffect(() => {
-    const id = setInterval(tick, 1000);
-    return () => clearInterval(id);
-  }, [tick]);
+  const features = [
+    {
+      icon: <Wind size={20} className="text-kevin-violet" />,
+      title: "Urban Climate Control",
+      text: "Wind-blocking Matte Cabretta Leather paired with our signature deep-violet micro-fiber lining. Retains natural heat without the bulk."
+    },
+    {
+      icon: <Fingerprint size={20} className="text-kevin-violet" />,
+      title: "Invisible Touch Technology",
+      text: "Seamless screen interaction. Carbon-threaded fingertips hidden beneath the leather allow full control of your devices without breaking character."
+    },
+    {
+      icon: <Lock size={20} className="text-kevin-violet" />,
+      title: "ENGINEERED SCARCITY",
+      text: "Only 50 units exist. Laser-engraved iridescent side-zipper. Vacuum-sealed tactical packaging. Once they are gone, Lot 001 is archived forever."
+    }
+  ];
 
   return (
     <section
-      id="drop"
-      className="relative min-h-screen flex items-center overflow-hidden bg-obsidian-black"
+      id="hero"
+      className="relative min-h-[100svh] flex items-center overflow-hidden bg-obsidian-black pt-24 pb-16"
     >
       {/* ─── Ambient Background Effects ─── */}
-      {/* Large violet glow behind hero image */}
       <div
-        className="absolute right-0 top-1/2 -translate-y-1/2 w-[700px] h-[700px] pointer-events-none"
+        className="absolute right-0 top-1/2 -translate-y-1/2 w-[800px] h-[800px] pointer-events-none opacity-50"
         style={{
-          background: 'radial-gradient(ellipse at center, rgba(139, 92, 246, 0.13) 0%, transparent 65%)',
-          filter: 'blur(60px)',
-        }}
-      />
-      {/* Subtle left ambient */}
-      <div
-        className="absolute left-0 bottom-0 w-[400px] h-[400px] pointer-events-none"
-        style={{
-          background: 'radial-gradient(ellipse at bottom-left, rgba(139, 92, 246, 0.05) 0%, transparent 70%)',
+          background: 'radial-gradient(ellipse at center, rgba(139, 92, 246, 0.15) 0%, transparent 60%)',
           filter: 'blur(80px)',
         }}
       />
+      
       {/* Grid lines overlay */}
       <div
-        className="absolute inset-0 pointer-events-none opacity-[0.025]"
+        className="absolute inset-0 pointer-events-none opacity-[0.03]"
         style={{
           backgroundImage: `
             linear-gradient(rgba(139, 92, 246, 0.8) 1px, transparent 1px),
@@ -91,105 +54,103 @@ export default function Hero({ lang }: HeroProps) {
         }}
       />
 
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-16 w-full">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-center">
 
-          {/* ─── Left: Text & CTA ─── */}
+          {/* ─── Left: Text & Features ─── */}
           <div className="flex flex-col gap-8 order-2 lg:order-1">
-
-            {/* Badge */}
-            <div className="flex items-center gap-3">
-              <span className="badge-glow inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold tracking-wider text-kevin-glow uppercase">
-                {t(lang, 'hero.badge')}
-              </span>
-              <span className="text-zinc-500 text-xs font-mono">
-                {t(lang, 'hero.badge.sub')}
-              </span>
-            </div>
-
-            {/* H1 Title */}
-            <h1
-              className="text-4xl sm:text-5xl md:text-6xl font-black leading-[1.05] tracking-tight text-white"
-              style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
-            >
-              {t(lang, 'hero.h1').split('. ').map((part, i, arr) => (
-                <span key={i}>
-                  {part}{i < arr.length - 1 && (
-                    <>
-                      .<br />
-                    </>
-                  )}
+            
+            <div className="space-y-4">
+              {/* Badge */}
+              <div className="flex items-center gap-3">
+                <span className="badge-glow inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-[10px] font-bold tracking-[0.2em] text-kevin-glow uppercase border border-kevin-violet/30 bg-kevin-violet/5">
+                  <ShieldCheck size={14} />
+                  DROP 001
                 </span>
-              ))}
-            </h1>
-
-            {/* Subtitle */}
-            <p className="text-zinc-400 text-lg md:text-xl leading-relaxed max-w-md">
-              {t(lang, 'hero.subtitle')}
-            </p>
-
-            {/* ─── Countdown Timer ─── */}
-            <div className="flex flex-col gap-3">
-              <div className="flex items-center gap-3 sm:gap-4">
-                <DigitBlock value={time.days} label={t(lang, 'hero.countdown.days')} />
-                <span className="text-zinc-500 font-mono text-2xl font-thin mt-[-1rem]">:</span>
-                <DigitBlock value={time.hours} label={t(lang, 'hero.countdown.hours')} />
-                <span className="text-zinc-500 font-mono text-2xl font-thin mt-[-1rem]">:</span>
-                <DigitBlock value={time.minutes} label={t(lang, 'hero.countdown.mins')} />
-                <span className="text-zinc-500 font-mono text-2xl font-thin mt-[-1rem]">:</span>
-                <DigitBlock value={time.seconds} label={t(lang, 'hero.countdown.secs')} />
+                <span className="text-zinc-600 text-xs font-mono tracking-widest uppercase">
+                  Verified Authentic
+                </span>
               </div>
+
+              {/* H1 Title */}
+              <h1
+                className="text-5xl sm:text-6xl md:text-7xl font-black leading-[1.05] tracking-tighter text-white uppercase"
+                style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+              >
+                THE SECOND SKIN.<br />
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-white to-zinc-500">
+                  LOT 001.
+                </span>
+              </h1>
+
+              {/* Subtitle */}
+              <p className="text-zinc-400 text-lg md:text-xl leading-relaxed max-w-lg font-light">
+                Dark luxury meets urban utility. The Founder's Drop is here. 
+                <span className="text-white font-medium ml-1">Strictly limited to 50 pairs.</span>
+              </p>
             </div>
 
-            {/* Stock warning */}
-            <p className="text-zinc-500 text-sm font-mono">
-              <span className="inline-block w-2 h-2 bg-red-500 rounded-full mr-2 align-middle animate-pulse" />
-              {t(lang, 'hero.stock', { n: 37 })}
-            </p>
+            {/* Feature List */}
+            <div className="flex flex-col gap-6 mt-2 max-w-xl">
+              {features.map((feature, idx) => (
+                <div key={idx} className="flex gap-4 items-start group">
+                  <div className="mt-1 w-10 h-10 rounded-lg bg-[#09090B] border border-kevin-violet/20 flex items-center justify-center shrink-0 group-hover:border-kevin-violet/50 transition-colors">
+                    {feature.icon}
+                  </div>
+                  <div>
+                    <h3 className="text-white font-bold text-sm tracking-wide uppercase mb-1">
+                      {feature.title}
+                    </h3>
+                    <p className="text-zinc-500 text-sm leading-relaxed">
+                      {feature.text}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
 
             {/* CTA Button */}
-            <div className="flex flex-col sm:flex-row gap-4 items-start">
+            <div className="pt-4">
               <button
                 onClick={() => {
                   addItem({
-                    id: 'obd-glove-001-m',
-                    name: "Founder's Glove — Drop 001",
+                    id: 'obd-lot-001',
+                    name: "Founder's Glove — Lot 001",
                     nameEs: 'Guante Fundador — Lote 001',
-                    price: 120,
+                    price: 150,
                     image: '/images/hero_glove.png',
                     size: 'M',
-                    variant: 'Talla M / Carbon Black',
+                    variant: 'One Size / Carbon Black',
                   });
                   openCart();
                 }}
-                className="btn-primary animate-pulse-glow flex items-center gap-2 text-sm"
-                aria-label="Pre-order gloves"
+                className="btn-primary animate-pulse-glow flex items-center gap-3 text-sm px-8 py-4 uppercase tracking-widest w-full sm:w-auto justify-center"
               >
-                {t(lang, 'hero.cta')}
-                <ArrowRight size={16} strokeWidth={2} />
+                {lang === 'es' ? 'Pre-ordenar Ahora' : 'Pre-order Now'}
+                <ArrowRight size={18} strokeWidth={2} />
               </button>
             </div>
           </div>
 
           {/* ─── Right: Glove Image ─── */}
-          <div className="relative flex items-center justify-center order-1 lg:order-2 min-h-[320px]">
+          <div className="relative flex items-center justify-center order-1 lg:order-2 h-[50vh] lg:h-auto min-h-[400px]">
             {/* Radial violet glow behind glove */}
             <div
               className="absolute inset-0 m-auto pointer-events-none"
               style={{
-                width: '80%',
-                height: '80%',
-                background: 'radial-gradient(ellipse at center, rgba(139, 92, 246, 0.22) 0%, transparent 65%)',
-                filter: 'blur(40px)',
+                width: '70%',
+                height: '70%',
+                background: 'radial-gradient(ellipse at center, rgba(139, 92, 246, 0.25) 0%, transparent 70%)',
+                filter: 'blur(50px)',
                 borderRadius: '50%',
               }}
             />
 
             {/* Glove Image with float animation */}
-            <div className="animate-float relative z-10 w-full max-w-[480px] mx-auto">
+            <div className="animate-float relative z-10 w-full max-w-[550px] mx-auto">
               <img
                 src="/images/hero_glove.png"
-                alt={lang === 'es' ? 'Guante de cuero premium Obsidian' : 'Obsidian premium leather glove'}
+                alt="Obsidian Lot 001 Glove"
                 className="w-full h-auto object-contain drop-shadow-2xl"
                 style={{
                   filter: 'drop-shadow(0 0 40px rgba(139, 92, 246, 0.4)) drop-shadow(0 0 80px rgba(109, 40, 217, 0.2))',
@@ -197,17 +158,20 @@ export default function Hero({ lang }: HeroProps) {
               />
             </div>
 
-            {/* Stats floating tag */}
-            <div className="absolute bottom-4 right-4 glass rounded-lg px-4 py-3 flex flex-col items-end">
-              <span className="text-white font-black text-xl font-mono">$120</span>
-              <span className="text-zinc-500 text-xs font-mono tracking-widest">USD</span>
+            {/* "1 OF 50" floating left tag */}
+            <div className="absolute top-10 left-0 md:left-10 glass rounded-lg px-4 py-2 border border-kevin-violet/30">
+              <span className="text-white text-[10px] font-mono font-bold tracking-[0.2em] uppercase flex items-center gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+                1 of 50
+              </span>
             </div>
 
-            {/* "FOUNDERS" floating left tag */}
-            <div className="absolute top-4 left-4 glass rounded-lg px-3 py-2">
-              <span className="text-kevin-glow text-[10px] font-mono font-bold tracking-widest uppercase">
-                Founder's Ed.
-              </span>
+            {/* Tagline floating bottom right */}
+            <div className="absolute bottom-10 right-0 md:right-10 glass rounded-lg px-5 py-3 border border-zinc-800 backdrop-blur-md">
+              <p className="text-zinc-400 text-[10px] font-mono tracking-widest uppercase">
+                Obsidian Core Div. <br />
+                <span className="text-kevin-violet font-bold">Absolute Leather.</span>
+              </p>
             </div>
           </div>
 

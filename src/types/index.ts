@@ -10,6 +10,18 @@ export interface Product {
   imageUrl?: string;
 }
 
+export interface Glove {
+  id: number;
+  name: string;
+  slug: string;
+  description: string;
+  price: string; // Django DecimalField is serialized as string
+  stock: number;
+  image: string;
+  size: 'S' | 'M' | 'L' | 'XL';
+  created_at: string;
+}
+
 // ─── Language ─────────────────────────────────────────────────────────────────
 
 export type Lang = 'es' | 'en';

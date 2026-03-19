@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
+import ShopSection from './components/ShopSection';
 import Features from './components/Features';
 import Footer from './components/Footer';
 import CartDrawer from './components/CartDrawer';
@@ -61,6 +62,7 @@ export default function App() {
 
             <main>
               <Hero lang={lang} />
+              <ShopSection lang={lang} />
               <Features lang={lang} />
             </main>
 
