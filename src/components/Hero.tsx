@@ -1,32 +1,62 @@
-import { ArrowRight, Wind, Fingerprint, Lock, ShieldCheck } from 'lucide-react';
-import type { Lang } from '../types';
+import { useEffect, useState, useCallback } from 'react';
+import { ArrowRight, ShieldCheck } from 'lucide-react';
+import type { Lang, CountdownTime } from '../types';
 import { useCartStore } from '../store/useCartStore';
 
 interface HeroProps {
   lang: Lang;
 }
 
+// Target date: 48 hours from now for the drop urgency
+const TARGET_DATE = new Date(Date.now() + 2 * 24 * 60 * 60 * 1000 + 4 * 60 * 60 * 1000).getTime();
+
+function getTimeLeft(): CountdownTime {
+  const now = Date.now();
+  const diff = Math.max(0, TARGET_DATE - now);
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+  const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+  return { days, hours, minutes, seconds };
+}
+
+function pad(n: number): string {
+  return n.toString().padStart(2, '0');
+}
+
+interface DigitBlockProps {
+  value: number;
+  label: string;
+}
+
+function DigitBlock({ value, label }: DigitBlockProps) {
+  return (
+    <div className="flex flex-col items-center gap-1">
+      <div className="glass px-4 py-3 rounded-xl border border-kevin-violet/30 shadow-[0_0_15px_rgba(139,92,246,0.2)]">
+        <span className="font-mono text-3xl sm:text-4xl md:text-5xl font-black text-emerald-400 drop-shadow-[0_0_10px_rgba(52,211,153,0.8)]">
+          {pad(value)}
+        </span>
+      </div>
+      <span className="text-[10px] sm:text-xs font-mono text-kevin-violet tracking-[0.2em] uppercase font-bold mt-2">
+        {label}
+      </span>
+    </div>
+  );
+}
+
 export default function Hero({ lang }: HeroProps) {
+  const [time, setTime] = useState<CountdownTime>(getTimeLeft);
   const addItem = useCartStore((s) => s.addItem);
   const openCart = useCartStore((s) => s.openCart);
 
-  const features = [
-    {
-      icon: <Wind size={20} className="text-kevin-violet" />,
-      title: "Urban Climate Control",
-      text: "Wind-blocking Matte Cabretta Leather paired with our signature deep-violet micro-fiber lining. Retains natural heat without the bulk."
-    },
-    {
-      icon: <Fingerprint size={20} className="text-kevin-violet" />,
-      title: "Invisible Touch Technology",
-      text: "Seamless screen interaction. Carbon-threaded fingertips hidden beneath the leather allow full control of your devices without breaking character."
-    },
-    {
-      icon: <Lock size={20} className="text-kevin-violet" />,
-      title: "ENGINEERED SCARCITY",
-      text: "Only 50 units exist. Laser-engraved iridescent side-zipper. Vacuum-sealed tactical packaging. Once they are gone, Lot 001 is archived forever."
-    }
-  ];
+  const tick = useCallback(() => {
+    setTime(getTimeLeft());
+  }, []);
+
+  useEffect(() => {
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [tick]);
 
   return (
     <section
@@ -57,15 +87,15 @@ export default function Hero({ lang }: HeroProps) {
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-center">
 
-          {/* ─── Left: Text & Features ─── */}
-          <div className="flex flex-col gap-8 order-2 lg:order-1">
+          {/* ─── Left: Text & CTA ─── */}
+          <div className="flex flex-col gap-10 order-2 lg:order-1">
             
-            <div className="space-y-4">
+            <div className="space-y-6">
               {/* Badge */}
               <div className="flex items-center gap-3">
-                <span className="badge-glow inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-[10px] font-bold tracking-[0.2em] text-kevin-glow uppercase border border-kevin-violet/30 bg-kevin-violet/5">
+                <span className="badge-glow inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-[10px] font-bold tracking-[0.2em] text-emerald-400 uppercase border border-emerald-500/30 bg-emerald-500/10 shadow-[0_0_10px_rgba(52,211,153,0.2)]">
                   <ShieldCheck size={14} />
-                  DROP 001
+                  DROP 001 ACTIVE
                 </span>
                 <span className="text-zinc-600 text-xs font-mono tracking-widest uppercase">
                   Verified Authentic
@@ -90,27 +120,19 @@ export default function Hero({ lang }: HeroProps) {
               </p>
             </div>
 
-            {/* Feature List */}
-            <div className="flex flex-col gap-6 mt-2 max-w-xl">
-              {features.map((feature, idx) => (
-                <div key={idx} className="flex gap-4 items-start group">
-                  <div className="mt-1 w-10 h-10 rounded-lg bg-[#09090B] border border-kevin-violet/20 flex items-center justify-center shrink-0 group-hover:border-kevin-violet/50 transition-colors">
-                    {feature.icon}
-                  </div>
-                  <div>
-                    <h3 className="text-white font-bold text-sm tracking-wide uppercase mb-1">
-                      {feature.title}
-                    </h3>
-                    <p className="text-zinc-500 text-sm leading-relaxed">
-                      {feature.text}
-                    </p>
-                  </div>
-                </div>
-              ))}
+            {/* ─── Neon Countdown Timer ─── */}
+            <div className="flex items-center gap-2 sm:gap-4 mt-2">
+              <DigitBlock value={time.days} label={lang === 'es' ? 'DÍAS' : 'DAYS'} />
+              <span className="text-kevin-violet font-mono text-3xl font-thin pb-6 animate-pulse">:</span>
+              <DigitBlock value={time.hours} label={lang === 'es' ? 'HORAS' : 'HOURS'} />
+              <span className="text-kevin-violet font-mono text-3xl font-thin pb-6 animate-pulse">:</span>
+              <DigitBlock value={time.minutes} label={lang === 'es' ? 'MINS' : 'MINS'} />
+              <span className="text-kevin-violet font-mono text-3xl font-thin pb-6 animate-pulse">:</span>
+              <DigitBlock value={time.seconds} label={lang === 'es' ? 'SEGS' : 'SECS'} />
             </div>
 
             {/* CTA Button */}
-            <div className="pt-4">
+            <div className="pt-6">
               <button
                 onClick={() => {
                   addItem({
@@ -124,10 +146,10 @@ export default function Hero({ lang }: HeroProps) {
                   });
                   openCart();
                 }}
-                className="btn-primary animate-pulse-glow flex items-center gap-3 text-sm px-8 py-4 uppercase tracking-widest w-full sm:w-auto justify-center"
+                className="btn-primary animate-pulse-glow flex items-center gap-3 px-10 py-5 text-base font-bold uppercase tracking-[0.2em] w-full sm:w-auto justify-center bg-white text-black hover:bg-zinc-200 transition-colors rounded"
               >
-                {lang === 'es' ? 'Pre-ordenar Ahora' : 'Pre-order Now'}
-                <ArrowRight size={18} strokeWidth={2} />
+                {lang === 'es' ? 'Pre-ordenar Ahora' : 'PRE-ORDER NOW'}
+                <ArrowRight size={20} strokeWidth={2} />
               </button>
             </div>
           </div>
@@ -159,9 +181,9 @@ export default function Hero({ lang }: HeroProps) {
             </div>
 
             {/* "1 OF 50" floating left tag */}
-            <div className="absolute top-10 left-0 md:left-10 glass rounded-lg px-4 py-2 border border-kevin-violet/30">
+            <div className="absolute top-10 left-0 md:left-10 glass rounded-lg px-4 py-2 border border-emerald-500/30">
               <span className="text-white text-[10px] font-mono font-bold tracking-[0.2em] uppercase flex items-center gap-2">
-                <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+                <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
                 1 of 50
               </span>
             </div>
