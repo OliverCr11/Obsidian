@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { ArrowRight, ShieldCheck } from 'lucide-react';
 import type { Lang, CountdownTime } from '../types';
 import { useCartStore } from '../store/useCartStore';
+import { useProducts } from '../hooks/useProducts';
 import { t } from '../i18n/translations';
 
 interface HeroProps {
@@ -49,6 +50,7 @@ export default function Hero({ lang }: HeroProps) {
   const [time, setTime] = useState<CountdownTime>(getTimeLeft);
   const addItem = useCartStore((s) => s.addItem);
   const openCart = useCartStore((s) => s.openCart);
+  const { dropProduct, loading } = useProducts();
 
   const tick = useCallback(() => {
     setTime(getTimeLeft());
@@ -135,21 +137,23 @@ export default function Hero({ lang }: HeroProps) {
             {/* CTA Button */}
             <div className="pt-6">
               <button
+                disabled={loading || (dropProduct ? dropProduct.stock <= 0 : false)}
                 onClick={() => {
                   addItem({
-                    id: 'obd-lot-001',
-                    name: "Founder's Glove — Lot 001",
-                    nameEs: 'Guante Fundador — Lote 001',
-                    price: 150,
-                    image: '/images/hero_glove.png',
-                    size: 'M',
+                    id: dropProduct ? `db-drop-${dropProduct.id}` : 'obd-lot-001',
+                    name: dropProduct ? dropProduct.name : "Founder's Glove — Lot 001",
+                    nameEs: dropProduct ? dropProduct.name : 'Guante Fundador — Lote 001',
+                    price: dropProduct ? parseFloat(dropProduct.price) : 150,
+                    image: dropProduct ? dropProduct.image : '/images/hero_glove.png',
+                    size: dropProduct ? dropProduct.size : 'M',
                     variant: 'One Size / Carbon Black',
                   });
                   openCart();
                 }}
-                className="btn-primary animate-pulse-glow flex items-center gap-3 px-10 py-5 text-base font-bold uppercase tracking-[0.2em] w-full sm:w-auto justify-center bg-white text-black hover:bg-zinc-200 transition-colors rounded"
+                className="btn-primary animate-pulse-glow flex items-center gap-3 px-10 py-5 text-base font-bold uppercase tracking-[0.2em] w-full sm:w-auto justify-center bg-white text-black hover:bg-zinc-200 transition-colors rounded disabled:opacity-50"
               >
                 {t(lang, 'hero.cta.preorder')}
+                {dropProduct && <span className="text-zinc-500 font-mono ml-2">— ${parseFloat(dropProduct.price).toFixed(2)}</span>}
                 <ArrowRight size={20} strokeWidth={2} />
               </button>
             </div>
@@ -185,7 +189,7 @@ export default function Hero({ lang }: HeroProps) {
             <div className="absolute top-10 left-0 md:left-10 glass rounded-lg px-4 py-2 border border-emerald-500/30">
               <span className="text-white text-[10px] font-mono font-bold tracking-[0.2em] uppercase flex items-center gap-2">
                 <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
-                {t(lang, 'hero.limit.badge')}
+                {dropProduct ? `${dropProduct.stock} LEFT` : t(lang, 'hero.limit.badge')}
               </span>
             </div>
 

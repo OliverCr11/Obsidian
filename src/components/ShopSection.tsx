@@ -9,7 +9,7 @@ interface ShopSectionProps {
 }
 
 export default function ShopSection({ lang }: ShopSectionProps) {
-  const { products, loading, error } = useProducts();
+  const { coreProducts, loading, error } = useProducts();
   const addItem = useCartStore((s) => s.addItem);
   const openCart = useCartStore((s) => s.openCart);
 
@@ -20,10 +20,10 @@ export default function ShopSection({ lang }: ShopSectionProps) {
         <div className="flex flex-col md:flex-row justify-between items-end mb-12">
           <div>
             <h2 className="text-3xl md:text-5xl font-black tracking-tight text-white mb-2">
-              {lang === 'es' ? 'Colección Exclusiva' : 'Exclusive Drop'}
+              {lang === 'es' ? 'Colección Core' : 'Core Collection'}
             </h2>
             <p className="text-zinc-400">
-              {lang === 'es' ? 'Piezas limitadas. No habrá restock.' : 'Limited pieces. No restocks.'}
+              {lang === 'es' ? 'Equipamiento táctico permanente.' : 'Permanent tactical equipment.'}
             </p>
           </div>
         </div>
@@ -40,14 +40,20 @@ export default function ShopSection({ lang }: ShopSectionProps) {
           </div>
         )}
 
-        {!loading && !error && products.length === 0 && (
-          <div className="text-center text-zinc-500 py-20">
-            {lang === 'es' ? 'No hay productos disponibles.' : 'No products available.'}
+        {!loading && !error && coreProducts.length === 0 && (
+          <div className="text-center justify-center items-center flex flex-col py-24 glass rounded-xl border border-zinc-900 border-dashed">
+            <span className="text-kevin-violet text-4xl mb-4 font-mono">_</span>
+            <p className="text-zinc-500 font-mono text-sm tracking-widest uppercase mb-2">
+              {lang === 'es' ? 'Señal Perdida' : 'Signal Lost'}
+            </p>
+            <p className="text-zinc-600 font-bold tracking-widest uppercase">
+              {lang === 'es' ? 'No hay items Core en este sector.' : 'No Core items in this sector.'}
+            </p>
           </div>
         )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {products.map((glove) => (
+          {coreProducts.map((glove) => (
             <div key={glove.id} className="group relative glass rounded-xl overflow-hidden hover:border-kevin-violet/50 transition-colors">
               
               {/* Image */}

@@ -10,6 +10,12 @@ export interface Product {
   imageUrl?: string;
 }
 
+export interface Category {
+  id: number;
+  name: string;
+  slug: string;
+}
+
 export interface Glove {
   id: number;
   name: string;
@@ -20,6 +26,8 @@ export interface Glove {
   image: string;
   size: 'S' | 'M' | 'L' | 'XL';
   created_at: string;
+  category?: Category | null;
+  collection_type: 'DROP' | 'CORE';
 }
 
 // ─── Language ─────────────────────────────────────────────────────────────────

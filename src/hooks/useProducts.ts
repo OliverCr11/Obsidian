@@ -3,6 +3,8 @@ import type { Glove } from '../types';
 
 export function useProducts() {
   const [products, setProducts] = useState<Glove[]>([]);
+  const [dropProduct, setDropProduct] = useState<Glove | null>(null);
+  const [coreProducts, setCoreProducts] = useState<Glove[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -15,6 +17,13 @@ export function useProducts() {
         }
         const data = await response.json();
         setProducts(data);
+        
+        // Filter logic for Drop vs Core collections
+        const drop = data.find((p: Glove) => p.collection_type === 'DROP') || null;
+        const cores = data.filter((p: Glove) => p.collection_type === 'CORE');
+        
+        setDropProduct(drop);
+        setCoreProducts(cores);
         setError(null);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred');
@@ -26,5 +35,5 @@ export function useProducts() {
     fetchProducts();
   }, []);
 
-  return { products, loading, error };
+  return { products, dropProduct, coreProducts, loading, error };
 }
