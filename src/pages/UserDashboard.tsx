@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { User, Package, Settings, LogOut, ChevronRight, ArrowLeft } from 'lucide-react';
+import { User, Package, Settings, LogOut, ChevronRight, ArrowLeft, Loader2 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
+import { useOrders } from '../hooks/useOrders';
 import type { Lang } from '../types';
 
 interface UserDashboardProps {
@@ -40,6 +41,7 @@ type Tab = 'profile' | 'orders' | 'settings';
 export default function UserDashboard({ lang, onBack }: UserDashboardProps) {
   const [activeTab, setActiveTab] = useState<Tab>('orders');
   const { logout } = useAuth();
+  const { orders, loading, error } = useOrders();
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -157,26 +159,47 @@ export default function UserDashboard({ lang, onBack }: UserDashboardProps) {
                     <div className="col-span-1"></div>
                   </div>
 
-                  <div className="divide-y divide-zinc-800/50">
-                    {MOCK_ORDERS.map((order) => (
+                  <div className="divide-y divide-zinc-800/50 min-h-[200px] relative">
+                    
+                    {loading && (
+                      <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-kevin-violet">
+                        <Loader2 className="animate-spin mb-4" size={32} />
+                        <span className="text-zinc-500 font-mono text-xs uppercase tracking-widest">Decrypting Records...</span>
+                      </div>
+                    )}
+
+                    {!loading && error && (
+                      <div className="flex flex-col items-center justify-center p-12 text-center text-red-400">
+                        <span className="text-sm font-mono">{error}</span>
+                      </div>
+                    )}
+
+                    {!loading && !error && orders.length === 0 && (
+                      <div className="flex flex-col items-center justify-center p-12 text-center text-zinc-500">
+                        <Package size={32} className="mb-4 text-zinc-600" />
+                        <span className="text-sm font-mono uppercase tracking-widest">No Drops Acquired Yet.</span>
+                      </div>
+                    )}
+
+                    {!loading && !error && orders.map((order) => (
                       <div
-                        key={order.id}
+                        key={order.id || order.order_id}
                         className="group flex flex-col md:grid md:grid-cols-12 gap-4 p-4 md:items-center hover:bg-zinc-800/30 transition-colors"
                       >
                         {/* Mobile Header per row */}
                         <div className="flex justify-between items-center md:hidden mb-2">
-                          <span className="text-white font-mono text-sm font-bold">{order.id}</span>
+                          <span className="text-white font-mono text-sm font-bold">{order.order_id.split('-')[0]}...</span>
                           <span className={`px-2.5 py-1 rounded-full text-[10px] font-mono font-bold uppercase border ${getStatusColor(order.status)}`}>
                             {order.status}
                           </span>
                         </div>
 
-                        <div className="hidden md:block col-span-3 text-white font-mono text-sm font-bold">
-                          {order.id}
+                        <div className="hidden md:block col-span-3 text-white font-mono text-sm font-bold truncate pr-4">
+                          {order.order_id}
                         </div>
                         <div className="col-span-3 text-zinc-400 text-sm">
-                          {order.date}
-                          <div className="text-xs mt-0.5 text-zinc-600 md:hidden">{order.items} item(s)</div>
+                          {new Date(order.created_at).toLocaleDateString()}
+                          <div className="text-xs mt-0.5 text-zinc-600 md:hidden">{order.items?.length || 0} item(s)</div>
                         </div>
                         <div className="hidden md:block col-span-3">
                           <span className={`px-2.5 py-1 rounded-full text-[10px] font-mono font-bold uppercase border ${getStatusColor(order.status)}`}>
@@ -184,7 +207,7 @@ export default function UserDashboard({ lang, onBack }: UserDashboardProps) {
                           </span>
                         </div>
                         <div className="col-span-2 text-left md:text-right font-mono text-white text-sm">
-                          ${order.total.toFixed(2)}
+                          ${Number(order.total_paid).toFixed(2)}
                           <span className="text-zinc-600 ml-1">USD</span>
                         </div>
                         <div className="col-span-1 flex justify-end">
