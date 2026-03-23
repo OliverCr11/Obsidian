@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { BrowserRouter, Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
@@ -9,10 +10,9 @@ import CartDrawer from './components/CartDrawer';
 import AuthPage from './pages/AuthPage';
 import UserDashboard from './pages/UserDashboard';
 import Checkout from './pages/Checkout';
+import ProductDetailPage from './pages/ProductDetailPage';
 import type { Lang } from './types';
 import './index.css';
-
-type Page = 'home' | 'auth' | 'dashboard' | 'checkout';
 
 const pageTransition = {
   initial:  { opacity: 0 },
@@ -20,62 +20,82 @@ const pageTransition = {
   exit:     { opacity: 0, transition: { duration: 0.2 } },
 };
 
-export default function App() {
-  const [lang, setLang]   = useState<Lang>('es');
-  const [page, setPage]   = useState<Page>('home');
-
-  const handleToggleLang = () => setLang((prev) => (prev === 'es' ? 'en' : 'es'));
+function RouterApp() {
+  const [lang, setLang] = useState<Lang>('es');
+  const location = useLocation();
+  const navigate = useNavigate();
 
   return (
-    <AnimatePresence mode="wait">
-      {page === 'dashboard' ? (
-        <motion.div key="dashboard" {...pageTransition} className="w-full">
-          <UserDashboard 
-            lang={lang} 
-            onBack={() => setPage('home')} 
-            onLogout={() => setPage('home')} 
-          />
-        </motion.div>
-      ) : page === 'checkout' ? (
-        <motion.div key="checkout" {...pageTransition} className="w-full">
-          <Checkout 
-            lang={lang} 
-            onBack={() => setPage('home')} 
-            onSuccess={() => setPage('dashboard')} 
-          />
-        </motion.div>
-      ) : page === 'auth' ? (
-        <motion.div key="auth" {...pageTransition}>
-          <AuthPage lang={lang} onBack={() => setPage('home')} />
-        </motion.div>
-      ) : (
-        <motion.div key="home" {...pageTransition}>
-          <div className="min-h-screen bg-obsidian-black text-obsidian-text antialiased">
-            {/* Subtle noise overlay */}
-            <div className="noise-overlay" aria-hidden="true" />
+    <>
+      <AnimatePresence mode="wait">
+        <Routes location={location} key={location.pathname}>
+          <Route path="/dashboard" element={
+            <motion.div {...pageTransition} className="w-full">
+              <UserDashboard 
+                lang={lang} 
+                onBack={() => navigate('/')} 
+                onLogout={() => navigate('/')} 
+              />
+            </motion.div>
+          } />
+          
+          <Route path="/checkout" element={
+            <motion.div {...pageTransition} className="w-full">
+              <Checkout 
+                lang={lang} 
+                onBack={() => navigate('/')} 
+                onSuccess={() => navigate('/dashboard')} 
+              />
+            </motion.div>
+          } />
+          
+          <Route path="/auth" element={
+            <motion.div {...pageTransition}>
+              <AuthPage lang={lang} onBack={() => navigate('/')} />
+            </motion.div>
+          } />
+          
+          <Route path="/product/:slug" element={
+            <motion.div {...pageTransition} className="w-full">
+              <ProductDetailPage lang={lang} />
+            </motion.div>
+          } />
 
-            <Navbar
-              lang={lang}
-              onToggleLang={handleToggleLang}
-              onOpenAuth={() => setPage('dashboard')} /* Simulated logic: goes straight to dashboard for demo */
-            />
+          {/* Catch-all Homepage Route */}
+          <Route path="*" element={
+            <motion.div {...pageTransition}>
+              <div className="min-h-screen bg-obsidian-black text-obsidian-text antialiased">
+                <div className="noise-overlay" aria-hidden="true" />
+                <Navbar
+                  lang={lang}
+                  onToggleLang={() => setLang((prev) => (prev === 'es' ? 'en' : 'es'))}
+                  onOpenAuth={() => navigate('/dashboard')} 
+                />
+                <main>
+                  <Hero lang={lang} />
+                  <ShopSection lang={lang} />
+                  <Features lang={lang} />
+                </main>
+                <Footer lang={lang} />
+              </div>
+            </motion.div>
+          } />
+        </Routes>
+      </AnimatePresence>
 
-            <main>
-              <Hero lang={lang} />
-              <ShopSection lang={lang} />
-              <Features lang={lang} />
-            </main>
+      {/* Cart Drawer lives safely outside the route tree context so it floats globally! */}
+      <CartDrawer 
+        lang={lang} 
+        onCheckout={() => navigate('/checkout')} 
+      />
+    </>
+  );
+}
 
-            <Footer lang={lang} />
-
-            {/* Cart Drawer — rendered at root so it overlays everything */}
-            <CartDrawer 
-              lang={lang} 
-              onCheckout={() => setPage('checkout')} 
-            />
-          </div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+export default function App() {
+  return (
+    <BrowserRouter>
+      <RouterApp />
+    </BrowserRouter>
   );
 }

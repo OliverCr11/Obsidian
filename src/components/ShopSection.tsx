@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { useProducts } from '../hooks/useProducts';
 import { useCartStore } from '../store/useCartStore';
 import { ShoppingBag } from 'lucide-react';
@@ -65,20 +66,22 @@ export default function ShopSection({ lang }: ShopSectionProps) {
             <div key={glove.id} className="group relative glass rounded-xl overflow-hidden hover:border-kevin-violet/50 transition-colors">
               
               {/* Image */}
-              <div className="aspect-square bg-zinc-900/50 relative overflow-hidden flex items-center justify-center p-8">
+              <Link to={`/product/${glove.slug}`} className="block aspect-square bg-zinc-900/50 relative overflow-hidden flex items-center justify-center p-8 group-hover:bg-zinc-900/80 transition-colors">
                 <div className="absolute inset-0 bg-gradient-to-tr from-kevin-violet/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                 <img 
                   src={glove.image} 
                   alt={glove.name}
                   className="w-full h-full object-contain filter drop-shadow-xl group-hover:scale-105 transition-transform duration-500"
                 />
-              </div>
+              </Link>
 
               {/* Content */}
               <div className="p-6">
                 <div className="flex justify-between items-start mb-2">
                   <h3 className="text-lg font-bold text-white leading-tight">
-                    {glove.name}
+                    <Link to={`/product/${glove.slug}`} className="hover:text-kevin-violet transition-colors">
+                      {glove.name}
+                    </Link>
                   </h3>
                   <span className="text-kevin-violet font-mono font-bold">
                     ${parseFloat(glove.price).toFixed(2)}
