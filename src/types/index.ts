@@ -26,7 +26,7 @@ export interface Glove {
   image: string;
   size: 'S' | 'M' | 'L' | 'XL';
   created_at: string;
-  category?: Category | null;
+  category?: string | null;
   collection_type: 'DROP' | 'CORE';
 }
 

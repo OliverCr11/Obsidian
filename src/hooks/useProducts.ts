@@ -19,8 +19,8 @@ export function useProducts() {
         setProducts(data);
         
         // Filter logic for Drop vs Core collections
-        const drop = data.find((p: Glove) => p.collection_type === 'DROP') || null;
-        const cores = data.filter((p: Glove) => p.collection_type === 'CORE');
+        const drop = data.find((p: Glove) => p.collection_type?.toUpperCase() === 'DROP') || null;
+        const cores = data.filter((p: Glove) => p.collection_type?.toUpperCase() === 'CORE');
         
         setDropProduct(drop);
         setCoreProducts(cores);

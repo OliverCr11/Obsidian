@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useProducts } from '../hooks/useProducts';
 import { useCartStore } from '../store/useCartStore';
 import { ShoppingBag } from 'lucide-react';
@@ -9,8 +10,15 @@ interface ShopSectionProps {
 }
 
 export default function ShopSection({ lang }: ShopSectionProps) {
-  const { coreProducts, loading, error } = useProducts();
+  const { products, coreProducts, loading, error } = useProducts();
   const addItem = useCartStore((s) => s.addItem);
+  
+  // Debug trace before UI rendering
+  useEffect(() => {
+    if (products.length > 0) {
+      console.log("Current Products:", products);
+    }
+  }, [products]);
   const openCart = useCartStore((s) => s.openCart);
 
   return (

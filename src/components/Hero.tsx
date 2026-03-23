@@ -50,7 +50,16 @@ export default function Hero({ lang }: HeroProps) {
   const [time, setTime] = useState<CountdownTime>(getTimeLeft);
   const addItem = useCartStore((s) => s.addItem);
   const openCart = useCartStore((s) => s.openCart);
-  const { dropProduct, loading } = useProducts();
+  
+  // Destructure 'products' to log it as requested by the prompt
+  const { products, dropProduct, loading } = useProducts();
+  
+  // Wrapped in useEffect to prevent the countdown timer from spamming the console
+  useEffect(() => {
+    if (products.length > 0) {
+      console.log("API Products:", products);
+    }
+  }, [products]);
 
   const tick = useCallback(() => {
     setTime(getTimeLeft());
