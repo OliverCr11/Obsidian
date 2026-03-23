@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { CreditCard, Truck, ChevronLeft, Lock, Loader2 } from 'lucide-react';
 import { useCartStore } from '../store/useCartStore';
 import { useAuthStore } from '../store/useAuthStore';
+import CouponInput from '../components/CouponInput';
 import type { Lang } from '../types';
 
 interface CheckoutProps {
@@ -22,10 +23,14 @@ export default function Checkout({ lang, onBack, onSuccess }: CheckoutProps) {
   const user = useAuthStore((s) => s.user);
   const navigate = useNavigate();
   
+  const discount = useCartStore((s: any) => s.discount);
+  const discountAmount = useCartStore((s: any) => s.getDiscountAmount());
+  
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const total = subtotal + (items.length > 0 ? SHIPPING_RATE : 0);
+  const finalSubtotal = subtotal - discountAmount;
+  const total = finalSubtotal + (items.length > 0 ? SHIPPING_RATE : 0);
 
   const handleOrderSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -40,6 +45,7 @@ export default function Checkout({ lang, onBack, onSuccess }: CheckoutProps) {
       address: formData.get('address'),
       city: formData.get('city'),
       total_paid: total,
+      coupon_code: discount?.code || null,
       items: items.map(item => ({
         glove: parseInt(item.id.replace(/\D/g, ''), 10) || parseInt(item.id, 10),
         price: item.price,
@@ -287,10 +293,21 @@ export default function Checkout({ lang, onBack, onSuccess }: CheckoutProps) {
 
             {/* Totals */}
             <div className="space-y-3 font-mono text-sm">
+              <div className="mb-6">
+                <CouponInput />
+              </div>
               <div className="flex justify-between text-zinc-400">
                 <span>Subtotal ({totalItems} items)</span>
                 <span className="text-white">${subtotal.toFixed(2)}</span>
               </div>
+              
+              {discountAmount > 0 && (
+                <div className="flex justify-between text-[#39FF14]">
+                  <span>Discount ({discount?.code})</span>
+                  <span>-${discountAmount.toFixed(2)}</span>
+                </div>
+              )}
+              
               <div className="flex justify-between text-zinc-400">
                 <span>Shipping Base Rate</span>
                 <span className="text-white">${items.length > 0 ? SHIPPING_RATE.toFixed(2) : '0.00'}</span>

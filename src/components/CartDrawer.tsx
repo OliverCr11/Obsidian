@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence, type Variants } from 'framer-motion';
 import { X, Plus, Minus, Trash2, ShoppingBag } from 'lucide-react';
 import { useCartStore } from '../store/useCartStore';
+import CouponInput from './CouponInput';
 import type { Lang } from '../types';
 
 interface CartDrawerProps {
@@ -53,6 +54,8 @@ export default function CartDrawer({ lang, onCheckout }: CartDrawerProps) {
   const updateQuantity = useCartStore((s) => s.updateQuantity);
   const subtotal = useCartStore((s) => s.totalPrice());
   const totalItems = useCartStore((s) => s.totalItems());
+  const discountAmount = useCartStore((s) => s.getDiscountAmount());
+  const finalTotal = subtotal - discountAmount;
   const navigate = useNavigate();
 
   // Lock body scroll when drawer is open
@@ -235,12 +238,38 @@ export default function CartDrawer({ lang, onCheckout }: CartDrawerProps) {
 
             {/* ─── Footer ──────────────────────────────────────────────── */}
             {items.length > 0 && (
-              <div className="px-6 py-6 border-t border-zinc-800/60 space-y-4">
+              <div className="px-6 py-6 border-t border-zinc-800/60 space-y-4 shadow-[0_-10px_40px_rgba(0,0,0,0.4)]">
+                
+                {/* Coupon Input */}
+                <div className="mb-2">
+                  <CouponInput />
+                </div>
+
                 {/* Subtotal row */}
-                <div className="flex items-center justify-between">
-                  <span className="text-zinc-400 text-sm">{labels.subtotal}</span>
-                  <span className="text-white font-black font-mono text-xl">
+                <div className="flex items-center justify-between text-zinc-400 text-sm">
+                  <span>{labels.subtotal}</span>
+                  <span className="font-mono text-zinc-300">
                     ${subtotal.toFixed(2)}
+                  </span>
+                </div>
+                
+                {/* Discount Row */}
+                {discountAmount > 0 && (
+                  <div className="flex items-center justify-between text-[#39FF14] text-sm">
+                    <span className="font-bold uppercase tracking-wider text-xs">Discount</span>
+                    <span className="font-mono font-bold">
+                      -${discountAmount.toFixed(2)}
+                    </span>
+                  </div>
+                )}
+                
+                <div className="h-px w-full bg-zinc-800/60 my-2" />
+                
+                {/* Final Total */}
+                <div className="flex items-center justify-between">
+                  <span className="text-white font-bold">Total</span>
+                  <span className="text-white font-black font-mono text-xl">
+                    ${finalTotal.toFixed(2)}
                   </span>
                 </div>
 
@@ -266,7 +295,7 @@ export default function CartDrawer({ lang, onCheckout }: CartDrawerProps) {
                     boxShadow: '0 0 20px rgba(139, 92, 246, 0.4)',
                   }}
                 >
-                  {labels.checkout} — ${subtotal.toFixed(2)}
+                  {labels.checkout} — ${finalTotal.toFixed(2)}
                 </button>
               </div>
             )}

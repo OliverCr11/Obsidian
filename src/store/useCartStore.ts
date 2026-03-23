@@ -15,16 +15,22 @@ export interface CartItem {
   variant?: string;    // optional full variant label e.g. "Talla M / Carbon Black"
 }
 
-// ─── Store Shape ───────────────────────────────────────────────────────────────
+export interface Discount {
+  code: string;
+  type: 'PERCENTAGE' | 'FIXED';
+  value: number;
+}
 
 interface CartStore {
   // State
   cartItems: CartItem[];
   isOpen: boolean;
+  discount: Discount | null;
 
   // Computed (derived on every call — not stored)
   totalPrice: () => number;
   totalItems: () => number;
+  getDiscountAmount: () => number;
 
   // Cart UI
   openCart:   () => void;
@@ -36,6 +42,8 @@ interface CartStore {
   removeItem:     (id: string) => void;
   updateQuantity: (id: string, quantity: number) => void;
   clearCart:      () => void;
+  applyDiscount:  (discount: Discount) => void;
+  removeDiscount: () => void;
 }
 
 // ─── Store Definition ──────────────────────────────────────────────────────────
@@ -57,6 +65,7 @@ export const useCartStore = create<CartStore>()(
         },
       ],
       isOpen: false,
+      discount: null,
 
       // ── Computed ─────────────────────────────────────────────
       totalPrice: () =>
@@ -64,6 +73,16 @@ export const useCartStore = create<CartStore>()(
 
       totalItems: () =>
         get().cartItems.reduce((sum, i) => sum + i.quantity, 0),
+        
+      getDiscountAmount: () => {
+        const { discount, totalPrice } = get();
+        if (!discount) return 0;
+        const sub = totalPrice();
+        if (discount.type === 'PERCENTAGE') {
+          return sub * (discount.value / 100);
+        }
+        return Math.min(discount.value, sub);
+      },
 
       // ── Cart UI ───────────────────────────────────────────────
       openCart:   () => set({ isOpen: true }),
@@ -90,27 +109,32 @@ export const useCartStore = create<CartStore>()(
 
       /** Completely remove an item from the cart. */
       removeItem: (id) =>
-        set((s) => ({ cartItems: s.cartItems.filter((i) => i.id !== id) })),
+        set((s) => {
+          const newItems = s.cartItems.filter((i) => i.id !== id);
+          return { cartItems: newItems, discount: newItems.length === 0 ? null : s.discount };
+        }),
 
       /** Set an item's quantity directly (removes item if quantity ≤ 0). */
       updateQuantity: (id, quantity) =>
-        set((s) => ({
-          cartItems:
-            quantity <= 0
-              ? s.cartItems.filter((i) => i.id !== id)
-              : s.cartItems.map((i) =>
-                  i.id === id ? { ...i, quantity: Math.min(quantity, 10) } : i
-                ),
-        })),
+        set((s) => {
+          const newItems = quantity <= 0
+            ? s.cartItems.filter((i) => i.id !== id)
+            : s.cartItems.map((i) =>
+                i.id === id ? { ...i, quantity: Math.min(quantity, 10) } : i
+              );
+          return { cartItems: newItems, discount: newItems.length === 0 ? null : s.discount };
+        }),
 
       /** Empty the entire cart. */
-      clearCart: () => set({ cartItems: [] }),
+      clearCart: () => set({ cartItems: [], discount: null }),
+      applyDiscount: (discount) => set({ discount }),
+      removeDiscount: () => set({ discount: null }),
     }),
     {
       name: 'obsidian-cart',   // localStorage key
       storage: createJSONStorage(() => localStorage),
-      // Only persist the cart items array — isOpen resets to closed on refresh
-      partialize: (s) => ({ cartItems: s.cartItems }),
+      // Only persist the cart items array and discount
+      partialize: (s) => ({ cartItems: s.cartItems, discount: s.discount }),
     }
   )
 );
