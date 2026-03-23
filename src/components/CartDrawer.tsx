@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { motion, AnimatePresence, type Variants } from 'framer-motion';
 import { X, Plus, Minus, Trash2, ShoppingBag } from 'lucide-react';
 import { useCartStore } from '../store/useCartStore';
@@ -52,6 +52,56 @@ export default function CartDrawer({ lang, onCheckout }: CartDrawerProps) {
   const updateQuantity = useCartStore((s) => s.updateQuantity);
   const subtotal = useCartStore((s) => s.totalPrice());
   const totalItems = useCartStore((s) => s.totalItems());
+  // Assuming a clearCart method exists, otherwise we mock it or fallback
+  const clearCart = useCartStore((s: any) => s.clearCart || (() => {}));
+
+  const [isCheckoutMode, setIsCheckoutMode] = useState(false);
+  const [checkoutStatus, setCheckoutStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+
+  const handleCheckout = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    
+    setCheckoutStatus('loading');
+    
+    const orderData = {
+      full_name: formData.get('fullName'),
+      email: formData.get('email'),
+      address: formData.get('address'),
+      city: formData.get('city'),
+      total_paid: subtotal,
+      items: items.map(item => ({
+        // Strip string prefixes to retrieve the pure database ID
+        glove: parseInt(item.id.replace(/\D/g, ''), 10),
+        price: item.price,
+        quantity: item.quantity
+      }))
+    };
+
+    try {
+      const response = await fetch('http://127.0.0.1:8000/api/orders/create/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(orderData)
+      });
+
+      if (response.status === 201) {
+        setCheckoutStatus('success');
+        clearCart();
+        setTimeout(() => {
+          closeCart();
+          setIsCheckoutMode(false);
+          setCheckoutStatus('idle');
+          if (onCheckout) onCheckout();
+        }, 3000);
+      } else {
+        setCheckoutStatus('error');
+      }
+    } catch (err) {
+      console.error(err);
+      setCheckoutStatus('error');
+    }
+  };
 
   // Lock body scroll when drawer is open
   useEffect(() => {
@@ -116,16 +166,23 @@ export default function CartDrawer({ lang, onCheckout }: CartDrawerProps) {
               <div className="flex items-center gap-3">
                 <ShoppingBag size={20} strokeWidth={1.5} className="text-kevin-base" />
                 <h2 className="text-white font-bold text-lg tracking-tight">
-                  {labels.title}
+                  {isCheckoutMode ? (lang === 'es' ? 'Pago Seguro' : 'Secure Checkout') : labels.title}
                 </h2>
-                {totalItems > 0 && (
+                {!isCheckoutMode && totalItems > 0 && (
                   <span className="text-xs font-mono text-zinc-500">
                     {totalItems} {totalItems === 1 ? labels.item : labels.items}
                   </span>
                 )}
               </div>
               <button
-                onClick={closeCart}
+                onClick={() => {
+                  if (isCheckoutMode && checkoutStatus !== 'success') {
+                    setIsCheckoutMode(false);
+                    setCheckoutStatus('idle');
+                  } else {
+                    closeCart();
+                  }
+                }}
                 className="p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800/60 transition-colors"
                 aria-label="Close cart"
               >
@@ -133,10 +190,60 @@ export default function CartDrawer({ lang, onCheckout }: CartDrawerProps) {
               </button>
             </div>
 
-            {/* ─── Item List ───────────────────────────────────────────── */}
+            {/* ─── Body ───────────────────────────────────────────── */}
             <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4 scrollbar-thin">
               <AnimatePresence mode="popLayout">
-                {items.length === 0 ? (
+                {isCheckoutMode ? (
+                  checkoutStatus === 'success' ? (
+                    <motion.div
+                      key="success"
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      className="flex flex-col items-center justify-center h-full text-center py-20"
+                    >
+                      <div className="w-16 h-16 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center mb-6">
+                        <ShoppingBag size={28} />
+                      </div>
+                      <h3 className="text-2xl font-bold text-white mb-2">Order Confirmed</h3>
+                      <p className="text-zinc-400 text-sm">Your tactical gear is being prepared.</p>
+                    </motion.div>
+                  ) : (
+                    <motion.form
+                      key="checkout-form"
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -20 }}
+                      onSubmit={handleCheckout}
+                      className="flex flex-col gap-4"
+                    >
+                      {checkoutStatus === 'error' && (
+                        <div className="p-3 rounded bg-red-500/20 text-red-400 text-sm font-bold border border-red-500/50">
+                          Transaction failed. Please verify data and try again.
+                        </div>
+                      )}
+                      
+                      <div className="space-y-3">
+                        <label className="text-xs font-bold text-zinc-500 uppercase tracking-widest">Shipping Details</label>
+                        <input required name="fullName" type="text" placeholder="Full Name" className="w-full bg-zinc-900 border border-zinc-700 rounded-lg p-3 text-white placeholder-zinc-500 focus:outline-none focus:border-kevin-violet transition-colors" />
+                        <input required name="email" type="email" placeholder="Email Address" className="w-full bg-zinc-900 border border-zinc-700 rounded-lg p-3 text-white placeholder-zinc-500 focus:outline-none focus:border-kevin-violet transition-colors" />
+                        <input required name="address" type="text" placeholder="Street Address" className="w-full bg-zinc-900 border border-zinc-700 rounded-lg p-3 text-white placeholder-zinc-500 focus:outline-none focus:border-kevin-violet transition-colors" />
+                        <input required name="city" type="text" placeholder="City" className="w-full bg-zinc-900 border border-zinc-700 rounded-lg p-3 text-white placeholder-zinc-500 focus:outline-none focus:border-kevin-violet transition-colors" />
+                      </div>
+
+                      <button
+                        type="submit"
+                        disabled={checkoutStatus === 'loading'}
+                        className="mt-6 w-full py-4 rounded-lg font-black text-sm tracking-[0.12em] uppercase text-white transition-transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:scale-100"
+                        style={{
+                          background: 'linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%)',
+                          boxShadow: '0 0 20px rgba(139, 92, 246, 0.4)',
+                        }}
+                      >
+                        {checkoutStatus === 'loading' ? 'Authenticating...' : `Pay $${subtotal.toFixed(2)}`}
+                      </button>
+                    </motion.form>
+                  )
+                ) : items.length === 0 ? (
                   <motion.div
                     key="empty"
                     initial={{ opacity: 0, y: 20 }}
@@ -253,10 +360,7 @@ export default function CartDrawer({ lang, onCheckout }: CartDrawerProps) {
 
                 {/* Checkout CTA */}
                 <button
-                  onClick={() => {
-                    closeCart();
-                    if (onCheckout) onCheckout();
-                  }}
+                  onClick={() => setIsCheckoutMode(true)}
                   className="w-full py-4 rounded-lg font-black text-sm tracking-[0.12em] uppercase text-white transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
                   style={{
                     background: 'linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%)',
