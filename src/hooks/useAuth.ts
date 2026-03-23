@@ -20,7 +20,8 @@ export function useAuth() {
       const res = await fetch(`${API_BASE}/auth/login/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
+        // Native mirror of standard Django SimpleJWT requirements utilizing email mapping
+        body: JSON.stringify({ email, password, username: email })
       });
       
       const data = await res.json();
