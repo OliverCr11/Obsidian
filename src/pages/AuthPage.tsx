@@ -2,6 +2,7 @@ import { useState, useId } from 'react';
 import { motion, AnimatePresence, type Variants } from 'framer-motion';
 import { Mail, Lock, User, Eye, EyeOff, ArrowLeft, AlertCircle } from 'lucide-react';
 import type { Lang } from '../types';
+import { useAuth } from '../hooks/useAuth';
 
 interface AuthPageProps {
   lang: Lang;
@@ -171,6 +172,7 @@ function isValidEmail(email: string) {
 export default function AuthPage({ lang, onBack }: AuthPageProps) {
   const c = copy[lang];
   const uid = useId();
+  const { login, register, loading, error: authError } = useAuth();
 
   const [tab, setTab] = useState<AuthTab>('login');
 
@@ -197,7 +199,7 @@ export default function AuthPage({ lang, onBack }: AuthPageProps) {
   }
 
   // ── Login submit
-  function handleLogin(e: React.FormEvent) {
+  async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
     const errs: Record<string, string> = {};
     if (!loginEmail)             errs.email = c.errRequired;
@@ -205,14 +207,19 @@ export default function AuthPage({ lang, onBack }: AuthPageProps) {
     if (!loginPwd)               errs.pwd   = c.errRequired;
     else if (loginPwd.length < 8) errs.pwd  = c.errPwdLen;
     setLoginErrors(errs);
+    
     if (Object.keys(errs).length === 0) {
-      // ✅ Success — placeholder for real auth integration
-      console.log('[Obsidian] Login:', loginEmail);
+      const success = await login(loginEmail, loginPwd);
+      if (success) {
+        onBack();
+      } else {
+        setLoginErrors({ form: 'Invalid credentials. Please attempt again.' });
+      }
     }
   }
 
   // ── Register submit
-  function handleRegister(e: React.FormEvent) {
+  async function handleRegister(e: React.FormEvent) {
     e.preventDefault();
     const errs: Record<string, string> = {};
     if (!regName.trim())              errs.name    = c.errName;
@@ -222,8 +229,14 @@ export default function AuthPage({ lang, onBack }: AuthPageProps) {
     else if (regPwd.length < 8)       errs.pwd     = c.errPwdLen;
     if (regConfirm !== regPwd)        errs.confirm = c.errPwdMatch;
     setRegErrors(errs);
+    
     if (Object.keys(errs).length === 0) {
-      console.log('[Obsidian] Register:', regEmail);
+      const success = await register(regEmail, regPwd, regName);
+      if (success) {
+        onBack();
+      } else {
+        setRegErrors({ form: 'Registration failed. Email might already be in use.' });
+      }
     }
   }
 
@@ -374,24 +387,31 @@ export default function AuthPage({ lang, onBack }: AuthPageProps) {
                     autoComplete="current-password"
                   />
 
+                  {/* Error Notification */}
+                  {(loginErrors.form || authError) && (
+                    <div className="p-3 rounded-md bg-red-500/10 border border-red-500/30 text-xs text-red-400 font-mono tracking-widest text-center mt-2">
+                       {loginErrors.form || authError}
+                    </div>
+                  )}
+
                   {/* Forgot password */}
-                  <div className="flex justify-end">
+                  <div className="flex justify-end mt-2">
                     <button type="button" className="text-xs text-zinc-500 hover:text-kevin-glow transition-colors">
                       {c.forgotPwd}
                     </button>
                   </div>
 
-                  {/* Submit */}
                   <button
                     type="submit"
-                    className="w-full py-4 mt-2 rounded-lg font-black text-sm tracking-[0.12em] uppercase text-white transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                    disabled={loading}
+                    className="w-full flex items-center justify-center gap-2 py-4 mt-2 rounded-lg font-black text-sm tracking-[0.12em] uppercase text-white transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:scale-100"
                     style={{
                       background: 'linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%)',
                       animation: 'pulse-glow 3s cubic-bezier(0.4,0,0.6,1) infinite',
                       boxShadow: '0 0 25px rgba(139,92,246,0.35)',
                     }}
                   >
-                    {c.loginBtn}
+                    {loading ? <div className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin"/> : c.loginBtn}
                   </button>
 
                   {/* Divider */}
@@ -510,17 +530,25 @@ export default function AuthPage({ lang, onBack }: AuthPageProps) {
                     </motion.div>
                   )}
 
+                  {/* Error Notification */}
+                  {(regErrors.form || authError) && (
+                    <div className="p-3 rounded-md bg-red-500/10 border border-red-500/30 text-xs text-red-400 font-mono tracking-widest text-center mt-2">
+                       {regErrors.form || authError}
+                    </div>
+                  )}
+
                   {/* Submit */}
                   <button
                     type="submit"
-                    className="w-full py-4 mt-2 rounded-lg font-black text-sm tracking-[0.12em] uppercase text-white transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                    disabled={loading}
+                    className="w-full flex justify-center items-center gap-2 py-4 mt-2 rounded-lg font-black text-sm tracking-[0.12em] uppercase text-white transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:scale-100"
                     style={{
                       background: 'linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%)',
                       animation: 'pulse-glow 3s cubic-bezier(0.4,0,0.6,1) infinite',
                       boxShadow: '0 0 25px rgba(139,92,246,0.35)',
                     }}
                   >
-                    {c.registerBtn}
+                    {loading ? <div className="w-4 h-4 border-2 rounded-full border-white/30 border-t-white animate-spin"/> : c.registerBtn}
                   </button>
 
                   {/* Divider */}
