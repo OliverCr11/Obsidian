@@ -1,5 +1,8 @@
-import { CreditCard, Truck, ChevronLeft, Lock } from 'lucide-react';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { CreditCard, Truck, ChevronLeft, Lock, Loader2 } from 'lucide-react';
 import { useCartStore } from '../store/useCartStore';
+import { useAuthStore } from '../store/useAuthStore';
 import type { Lang } from '../types';
 
 interface CheckoutProps {
@@ -14,13 +17,60 @@ export default function Checkout({ lang, onBack, onSuccess }: CheckoutProps) {
   const items = useCartStore((s) => s.cartItems);
   const subtotal = useCartStore((s) => s.totalPrice());
   const totalItems = useCartStore((s) => s.totalItems());
+  // Explicitly pull active user profile properties alongside clearing logic
+  const clearCart = useCartStore((s: any) => s.clearCart || (() => {}));
+  const user = useAuthStore((s) => s.user);
+  const navigate = useNavigate();
   
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
   const total = subtotal + (items.length > 0 ? SHIPPING_RATE : 0);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleOrderSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // Simulate payment processing...
-    onSuccess();
+    setIsSubmitting(true);
+    setError(null);
+    
+    const formData = new FormData(e.currentTarget);
+    
+    const payload = {
+      full_name: `${formData.get('firstName')} ${formData.get('lastName')}`.trim(),
+      email: formData.get('email'),
+      address: formData.get('address'),
+      city: formData.get('city'),
+      total_paid: total,
+      items: items.map(item => ({
+        glove: parseInt(item.id.replace(/\D/g, ''), 10) || parseInt(item.id, 10),
+        price: item.price,
+        quantity: item.quantity
+      }))
+    };
+
+    const token = localStorage.getItem('token') || localStorage.getItem('access_token');
+
+    try {
+      const res = await fetch('http://127.0.0.1:8000/api/orders/create/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        },
+        body: JSON.stringify(payload)
+      });
+
+      if (!res.ok) {
+        throw new Error('Transaction declined. Server rejected credentials.');
+      }
+
+      clearCart();
+      if (onSuccess) onSuccess();
+      navigate('/dashboard'); 
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -42,7 +92,7 @@ export default function Checkout({ lang, onBack, onSuccess }: CheckoutProps) {
         
         {/* ─── LEFT: Form ─── */}
         <div className="lg:col-span-7 space-y-8">
-          <form onSubmit={handleSubmit} className="glass p-6 md:p-8 rounded-2xl border border-zinc-800/50 space-y-10">
+          <form onSubmit={handleOrderSubmit} className="glass p-6 md:p-8 rounded-2xl border border-zinc-800/50 space-y-10">
             
             {/* Contact Info */}
             <div>
@@ -54,16 +104,16 @@ export default function Checkout({ lang, onBack, onSuccess }: CheckoutProps) {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-1">
                     <label className="text-xs font-medium text-zinc-400 uppercase tracking-wider">First Name</label>
-                    <input type="text" required className="input-dark w-full" placeholder="Kevin" />
+                    <input name="firstName" type="text" required className="input-dark w-full" defaultValue={user?.name?.split(' ')[0] || ''} placeholder="Kevin" />
                   </div>
                   <div className="space-y-1">
                     <label className="text-xs font-medium text-zinc-400 uppercase tracking-wider">Last Name</label>
-                    <input type="text" required className="input-dark w-full" placeholder="Smith" />
+                    <input name="lastName" type="text" required className="input-dark w-full" defaultValue={user?.name?.split(' ').slice(1).join(' ') || ''} placeholder="Smith" />
                   </div>
                 </div>
                 <div className="space-y-1">
                   <label className="text-xs font-medium text-zinc-400 uppercase tracking-wider">Email Address</label>
-                  <input type="email" required className="input-dark w-full" placeholder="you@example.com" />
+                  <input name="email" type="email" required className="input-dark w-full" defaultValue={user?.email || ''} placeholder="you@example.com" />
                 </div>
               </div>
             </div>
@@ -80,16 +130,16 @@ export default function Checkout({ lang, onBack, onSuccess }: CheckoutProps) {
               <div className="space-y-4">
                 <div className="space-y-1">
                   <label className="text-xs font-medium text-zinc-400 uppercase tracking-wider">Street Address</label>
-                  <input type="text" required className="input-dark w-full" placeholder="123 Performance Ave" />
+                  <input name="address" type="text" required className="input-dark w-full" placeholder="123 Performance Ave" />
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="space-y-1 md:col-span-2">
                     <label className="text-xs font-medium text-zinc-400 uppercase tracking-wider">City</label>
-                    <input type="text" required className="input-dark w-full" placeholder="Quito" />
+                    <input name="city" type="text" required className="input-dark w-full" placeholder="Quito" />
                   </div>
                   <div className="space-y-1">
                     <label className="text-xs font-medium text-zinc-400 uppercase tracking-wider">ZIP</label>
-                    <input type="text" required className="input-dark w-full" placeholder="170102" />
+                    <input name="zip" type="text" required className="input-dark w-full" placeholder="170102" />
                   </div>
                 </div>
               </div>
@@ -183,8 +233,24 @@ export default function Checkout({ lang, onBack, onSuccess }: CheckoutProps) {
             </div>
 
             {/* Submit Button */}
-            <button type="submit" className="btn-primary w-full py-4 text-base font-bold animate-pulse-glow mt-8">
-              PAY ${total.toFixed(2)} USD
+            {error && (
+              <div className="bg-red-500/10 text-red-500 border border-red-500/20 px-4 py-3 rounded-lg text-sm font-mono mt-6">
+                {error}
+              </div>
+            )}
+            <button 
+              disabled={isSubmitting || items.length === 0} 
+              type="submit" 
+              className="btn-primary w-full py-4 text-base font-bold animate-pulse-glow mt-8 disabled:opacity-50 disabled:animate-none flex items-center justify-center gap-3 transition-colors"
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 size={20} className="animate-spin" />
+                  PROCESSING TRANSACTION...
+                </>
+              ) : (
+                `PAY $${total.toFixed(2)} USD`
+              )}
             </button>
 
           </form>
