@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { User, Package, Settings, LogOut, ChevronRight, ArrowLeft } from 'lucide-react';
+import { useAuth } from '../hooks/useAuth';
 import type { Lang } from '../types';
 
 interface UserDashboardProps {
@@ -36,8 +37,9 @@ const MOCK_ORDERS = [
 
 type Tab = 'profile' | 'orders' | 'settings';
 
-export default function UserDashboard({ lang, onBack, onLogout }: UserDashboardProps) {
+export default function UserDashboard({ lang, onBack }: UserDashboardProps) {
   const [activeTab, setActiveTab] = useState<Tab>('orders');
+  const { logout } = useAuth();
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -119,7 +121,7 @@ export default function UserDashboard({ lang, onBack, onLogout }: UserDashboardP
           <div className="hidden md:block flex-grow" />
           
           <button
-            onClick={onLogout}
+            onClick={logout}
             className="hidden md:flex items-center gap-3 p-3 rounded-xl text-red-400/80 hover:text-red-400 hover:bg-red-400/10 transition-colors mt-auto w-full"
           >
             <LogOut size={20} />

@@ -11,6 +11,7 @@ import AuthPage from './pages/AuthPage';
 import UserDashboard from './pages/UserDashboard';
 import Checkout from './pages/Checkout';
 import ProductDetailPage from './pages/ProductDetailPage';
+import VerifyEmailPage from './pages/VerifyEmailPage';
 import type { Lang } from './types';
 import './index.css';
 
@@ -58,6 +59,12 @@ function RouterApp() {
           <Route path="/product/:slug" element={
             <motion.div {...pageTransition} className="w-full">
               <ProductDetailPage lang={lang} />
+            </motion.div>
+          } />
+
+          <Route path="/verify-email/:token" element={
+            <motion.div {...pageTransition} className="w-full">
+              <VerifyEmailPage lang={lang} />
             </motion.div>
           } />
 

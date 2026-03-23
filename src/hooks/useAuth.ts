@@ -83,5 +83,10 @@ export function useAuth() {
     });
   };
 
-  return { login, register, logout, apiFetch, loading, error };
+  const handleLogout = () => {
+    logout();
+    window.location.href = '/';
+  };
+
+  return { login, register, logout: handleLogout, apiFetch, loading, error };
 }
