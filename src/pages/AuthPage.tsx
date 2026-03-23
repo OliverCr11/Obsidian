@@ -175,6 +175,7 @@ export default function AuthPage({ lang, onBack }: AuthPageProps) {
   const { login, register, loading, error: authError } = useAuth();
 
   const [tab, setTab] = useState<AuthTab>('login');
+  const [successMsg, setSuccessMsg] = useState('');
 
   // ── Login state
   const [loginEmail, setLoginEmail]       = useState('');
@@ -201,6 +202,7 @@ export default function AuthPage({ lang, onBack }: AuthPageProps) {
   // ── Login submit
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
+    setSuccessMsg(''); // Clear success alerts prior to logic stream
     const errs: Record<string, string> = {};
     if (!loginEmail)             errs.email = c.errRequired;
     else if (!isValidEmail(loginEmail)) errs.email = c.errEmail;
@@ -233,9 +235,12 @@ export default function AuthPage({ lang, onBack }: AuthPageProps) {
     if (Object.keys(errs).length === 0) {
       const success = await register(regEmail, regPwd, regName);
       if (success) {
-        onBack();
-      } else {
-        setRegErrors({ form: 'Registration failed. Email might already be in use.' });
+        setSuccessMsg('Account created successfully!');
+        setRegName('');
+        setRegEmail('');
+        setRegPwd('');
+        setRegConfirm('');
+        setTab('login');
       }
     }
   }
@@ -360,6 +365,12 @@ export default function AuthPage({ lang, onBack }: AuthPageProps) {
                   </h1>
                   <p className="text-zinc-500 text-sm">{c.loginSub}</p>
                 </div>
+
+                {successMsg && (
+                  <div className="p-3 mb-6 rounded-md bg-emerald-500/10 border border-emerald-500/30 text-xs text-emerald-400 font-mono tracking-widest text-center shadow-[0_0_15px_rgba(16,185,129,0.15)]">
+                     {successMsg}
+                  </div>
+                )}
 
                 {/* Form */}
                 <form onSubmit={handleLogin} noValidate className="space-y-4">

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/useAuthStore';
 
 const API_BASE = 'http://127.0.0.1:8000/api';
@@ -6,6 +7,7 @@ const API_BASE = 'http://127.0.0.1:8000/api';
 export function useAuth() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
   
   const setTokens = useAuthStore(s => s.setTokens);
   const setUser = useAuthStore(s => s.setUser);
@@ -29,6 +31,15 @@ export function useAuth() {
 
       setTokens(data.access, data.refresh);
       setUser({ email, name: email.split('@')[0] }); // Temporary name resolution fallback
+      
+      // Parallel legacy support for raw token reads
+      localStorage.setItem('access_token', data.access);
+      localStorage.setItem('refresh_token', data.refresh);
+      
+      // Synced legacy keys per request
+      localStorage.setItem('token', data.access);
+      localStorage.setItem('user_data', JSON.stringify({ email, name: email.split('@')[0] }));
+      
       return true;
     } catch (err: any) {
       setError(err.message || 'Network error');
@@ -45,17 +56,22 @@ export function useAuth() {
       const res = await fetch(`${API_BASE}/auth/register/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, first_name: name })
+        // Native mirror of standard Django AbstractBaseUser requirements utilizing email mapping
+        body: JSON.stringify({ email, password, first_name: name, username: email })
       });
 
       const data = await res.json();
 
       if (!res.ok) {
+        const rawErr = Object.values(data).flat().join(' ').toLowerCase();
+        if (rawErr.includes('already exists')) {
+          throw new Error('This email is already registered. Please log in instead.');
+        }
         throw new Error(Object.values(data).flat().join(', ') || 'Registration failed');
       }
 
-      // Chain logic: immediately login after registering to yield active tokens
-      return await login(email, password);
+      // Explicitly decoupled auto-login chain to enforce post-registration UI feedback
+      return true;
       
     } catch (err: any) {
       setError(err.message || 'Network error');
@@ -84,8 +100,19 @@ export function useAuth() {
   };
 
   const handleLogout = () => {
-    logout();
-    window.location.href = '/';
+    logout(); // Resets Zustand internally (token: null, user: null, isAuthenticated: false)
+    
+    // Explicit manual teardown matching exact key requirements
+    localStorage.removeItem('token');
+    localStorage.removeItem('user_data');
+    
+    // Clean persist store safely, intentionally preserving 'obsidian-cart'
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
+    localStorage.removeItem('obsidian-auth-core'); 
+    
+    console.log("Logout successful, storage cleared");
+    navigate('/auth');
   };
 
   return { login, register, logout: handleLogout, apiFetch, loading, error };
