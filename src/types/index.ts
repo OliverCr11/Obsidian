@@ -16,6 +16,12 @@ export interface Category {
   slug: string;
 }
 
+export interface ProductImage {
+  id: number;
+  image: string;
+  is_primary: boolean;
+}
+
 export interface Glove {
   id: number;
   name: string;
@@ -23,7 +29,7 @@ export interface Glove {
   description: string;
   price: string; // Django DecimalField is serialized as string
   stock: number;
-  image: string;
+  images: ProductImage[];
   size: 'S' | 'M' | 'L' | 'XL';
   created_at: string;
   category?: string | null;

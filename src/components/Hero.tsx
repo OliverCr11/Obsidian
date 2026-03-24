@@ -53,6 +53,13 @@ export default function Hero({ lang }: HeroProps) {
   
   // Destructure 'products' to log it as requested by the prompt
   const { products, dropProduct, loading } = useProducts();
+
+  const getDisplayImage = (product: any) => {
+    if (!product) return '/images/hero_glove.png';
+    const path = product.images?.find((img: any) => img.is_primary)?.image || product.images?.[0]?.image;
+    if (!path) return '/images/hero_glove.png';
+    return path.startsWith('http') ? path : `http://127.0.0.1:8000${path}`;
+  };
   
   // Wrapped in useEffect to prevent the countdown timer from spamming the console
   useEffect(() => {
@@ -153,7 +160,7 @@ export default function Hero({ lang }: HeroProps) {
                     name: dropProduct ? dropProduct.name : "Founder's Glove — Lot 001",
                     nameEs: dropProduct ? dropProduct.name : 'Guante Fundador — Lote 001',
                     price: dropProduct ? parseFloat(dropProduct.price) : 150,
-                    image: dropProduct ? dropProduct.image : '/images/hero_glove.png',
+                    image: getDisplayImage(dropProduct),
                     size: dropProduct ? dropProduct.size : 'M',
                     variant: 'One Size / Carbon Black',
                   });

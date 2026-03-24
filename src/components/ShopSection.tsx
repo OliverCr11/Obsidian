@@ -22,6 +22,12 @@ export default function ShopSection({ lang }: ShopSectionProps) {
   }, [products]);
   const openCart = useCartStore((s) => s.openCart);
 
+  const getDisplayImage = (glove: any) => {
+    const path = glove.images?.find((img: any) => img.is_primary)?.image || glove.images?.[0]?.image;
+    if (!path) return '/images/hero_glove.png';
+    return path.startsWith('http') ? path : `http://127.0.0.1:8000${path}`;
+  };
+
   return (
     <section id="shop" className="py-24 px-4 bg-obsidian-black relative">
       <div className="max-w-7xl mx-auto relative z-10">
@@ -69,7 +75,7 @@ export default function ShopSection({ lang }: ShopSectionProps) {
               <Link to={`/product/${glove.slug}`} className="block aspect-square bg-zinc-900/50 relative overflow-hidden flex items-center justify-center p-8 group-hover:bg-zinc-900/80 transition-colors">
                 <div className="absolute inset-0 bg-gradient-to-tr from-kevin-violet/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                 <img 
-                  src={glove.image} 
+                  src={getDisplayImage(glove)} 
                   alt={glove.name}
                   className="w-full h-full object-contain filter drop-shadow-xl group-hover:scale-105 transition-transform duration-500"
                 />
@@ -111,7 +117,7 @@ export default function ShopSection({ lang }: ShopSectionProps) {
                       name: glove.name,
                       nameEs: glove.name, // Simplified for dynamic API data
                       price: parseFloat(glove.price),
-                      image: glove.image,
+                      image: getDisplayImage(glove),
                       size: glove.size,
                       variant: `Size ${glove.size}`,
                     });
