@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ShoppingBag, ArrowLeft, Ruler, ShieldCheck, Wind } from 'lucide-react';
@@ -13,21 +13,36 @@ export default function ProductDetailPage({ lang }: { lang: Lang }) {
   const addItem = useCartStore((s) => s.addItem);
   const openCart = useCartStore((s) => s.openCart);
 
+  // PART 1: ROBUST STATE LOGIC
+  // Initialize as null safely before the product array arrives
+  const [activeImage, setActiveImage] = useState<any>(null);
+
   // Scroll to top on mount
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [slug]);
 
+  // Critical: Set Active Image once product safely evaluates inside Hook array
+  useEffect(() => {
+    if (product?.images?.length > 0) {
+      const primary = product.images.find((img: any) => img.is_primary) || product.images[0];
+      setActiveImage(primary);
+    }
+  }, [product]);
+
+  // Handle loading firmly verifying safe boundaries preserving 404 pipelines
   if (loading) {
     return (
       <div className="min-h-screen bg-obsidian-black flex items-center justify-center">
-        <div className="text-kevin-violet animate-pulse font-mono tracking-widest uppercase">
+        <div className="w-8 h-8 rounded-full border-2 border-[#8A2BE2] border-t-transparent animate-spin" />
+        <div className="ml-4 text-kevin-violet animate-pulse font-mono tracking-widest uppercase text-sm">
           Decrypting Data...
         </div>
       </div>
     );
   }
 
+  // Check if product exists physically shielding undefined renders internally
   if (error || !product) {
     return (
       <div className="min-h-screen bg-obsidian-black flex flex-col items-center justify-center p-4">
@@ -40,7 +55,7 @@ export default function ProductDetailPage({ lang }: { lang: Lang }) {
           <p className="text-zinc-400 font-mono text-sm mb-8">
             {lang === 'es' ? 'El sector solicitado no existe.' : 'The requested sector does not exist.'}
           </p>
-          <button 
+          <button
             onClick={() => navigate('/')}
             className="flex items-center gap-2 justify-center w-full py-4 rounded bg-zinc-900 border border-zinc-700 text-white font-bold hover:bg-zinc-800 transition-colors"
           >
@@ -52,13 +67,18 @@ export default function ProductDetailPage({ lang }: { lang: Lang }) {
     );
   }
 
+  const getImageUrl = (path?: string) => {
+    if (!path) return '/placeholder.jpg';
+    return path.startsWith('http') ? path : `http://127.0.0.1:8000${path}`;
+  };
+
   const handleAddToCart = () => {
     addItem({
       id: `db-pdp-${product.id}`,
       name: product.name,
-      nameEs: product.name, // Fallback since model currently uses single text row
+      nameEs: product.name,
       price: parseFloat(product.price.toString()),
-      image: product.image || '/images/hero_glove.png',
+      image: activeImage ? getImageUrl(activeImage.image) : '/images/hero_glove.png',
       size: product.size || 'M',
       variant: `${product.category || 'Standard'} / Black`
     });
@@ -68,9 +88,9 @@ export default function ProductDetailPage({ lang }: { lang: Lang }) {
   return (
     <div className="min-h-screen bg-obsidian-black text-white pt-24 pb-32 selection:bg-kevin-violet/30">
       <div className="noise-overlay" />
-      
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <button 
+        <button
           onClick={() => navigate('/')}
           className="flex items-center gap-2 text-zinc-500 hover:text-white transition-colors uppercase font-mono tracking-widest text-xs mb-12 group"
         >
@@ -78,24 +98,60 @@ export default function ProductDetailPage({ lang }: { lang: Lang }) {
           {lang === 'es' ? 'Volver al Inicio' : 'Back to Home'}
         </button>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 relative z-10">
-          <motion.div 
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="relative aspect-square lg:aspect-[4/5] rounded-2xl overflow-hidden bg-zinc-900 border border-zinc-800"
-          >
-            <img 
-              src={product.image || '/images/hero_glove.png'} 
-              alt={product.name}
-              className="w-full h-full object-cover object-center"
-            />
-            <div className="absolute top-4 left-4 bg-black/80 backdrop-blur-md px-3 py-1 font-mono text-[10px] tracking-widest uppercase border border-zinc-800 text-zinc-400">
-              // {product.category || 'CORE'}
-            </div>
-          </motion.div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 relative z-10 w-full">
+          
+          {/* PART 2: THE COMPONENT STRUCTURE - MAIN GALLERY */}
+          <div className="flex flex-col gap-4">
+            
+            {/* 1. Main Image Container */}
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="relative aspect-square w-full rounded-2xl overflow-hidden bg-[#000000] border border-zinc-800"
+            >
+              <motion.img
+                key={activeImage?.id || 'main-fallback'}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.3, ease: 'easeOut' }}
+                src={activeImage ? getImageUrl(activeImage.image) : '/placeholder.jpg'}
+                alt={product.name}
+                className="w-full h-full object-cover object-center"
+              />
+              <div className="absolute top-4 left-4 bg-black/80 backdrop-blur-md px-3 py-1 font-mono text-[10px] tracking-widest uppercase border border-zinc-800 text-zinc-400">
+                // {product.category || 'CORE'}
+              </div>
+            </motion.div>
+
+            {/* 2. Thumbnail List strictly isolated executing cleanly preventing crash cycles */}
+            {product?.images && product.images.length > 0 && (
+              <div className="flex flex-wrap gap-3 mt-2">
+                {product.images.map((img: any) => {
+                  const isActive = activeImage?.id === img.id;
+                  return (
+                    <button
+                      key={img.id}
+                      onClick={() => setActiveImage(img)}
+                      className={`w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden bg-[#000000] border-2 transition-transform hover:scale-105 ${
+                        isActive 
+                          ? 'border-[#8A2BE2] opacity-100' 
+                          : 'border-transparent opacity-50 hover:opacity-100'
+                      }`}
+                    >
+                      <img
+                        src={getImageUrl(img.image)}
+                        alt={`Thumbnail ${img.id}`}
+                        className="w-full h-full object-cover"
+                      />
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
 
           {/* Right Column: Details */}
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             className="flex flex-col justify-center"
@@ -146,7 +202,7 @@ export default function ProductDetailPage({ lang }: { lang: Lang }) {
                 {lang === 'es' ? 'Añadir al Carrito' : 'Add to Cart'}
               </span>
             </button>
-            
+
             <p className="text-center mt-6 text-xs text-zinc-600 font-mono">
               {lang === 'es' ? 'Envío seguro a nivel mundial.' : 'Secure global shipping.'}
             </p>
