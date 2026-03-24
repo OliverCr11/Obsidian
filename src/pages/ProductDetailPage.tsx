@@ -1,10 +1,37 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { ShoppingBag, ArrowLeft, Ruler, ShieldCheck, Wind } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ShoppingBag, ArrowLeft, Ruler, ShieldCheck, Wind, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useProductDetail } from '../hooks/useProductDetail';
 import { useCartStore } from '../store/useCartStore';
 import type { Lang } from '../types';
+
+// SLIDER ANIMATION VARIANTS
+const swipeConfidenceThreshold = 10000;
+const swipePower = (offset: number, velocity: number) => {
+  return Math.abs(offset) * velocity;
+};
+
+const slideVariants = {
+  enter: (direction: number) => {
+    return {
+      x: direction > 0 ? 500 : -500,
+      opacity: 0
+    };
+  },
+  center: {
+    zIndex: 1,
+    x: 0,
+    opacity: 1
+  },
+  exit: (direction: number) => {
+    return {
+      zIndex: 0,
+      x: direction < 0 ? 500 : -500,
+      opacity: 0
+    };
+  }
+};
 
 export default function ProductDetailPage({ lang }: { lang: Lang }) {
   const { slug } = useParams<{ slug: string }>();
@@ -13,24 +40,26 @@ export default function ProductDetailPage({ lang }: { lang: Lang }) {
   const addItem = useCartStore((s) => s.addItem);
   const openCart = useCartStore((s) => s.openCart);
 
-  // PART 1: ROBUST STATE LOGIC
-  // Initialize as null safely before the product array arrives
-  const [activeImage, setActiveImage] = useState<any>(null);
+  // PART 1: ROBUST STATE LOGIC FOR SLIDER
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [direction, setDirection] = useState(0);
 
   // Scroll to top on mount
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [slug]);
 
-  // Critical: Set Active Image once product safely evaluates inside Hook array
+  // Reset index when product mounts safely capturing the Array limits
   useEffect(() => {
-    if (product?.images?.length > 0) {
-      const primary = product.images.find((img: any) => img.is_primary) || product.images[0];
-      setActiveImage(primary);
+    if (product?.images?.length) {
+      // Safely default to the explicit primary configuration index or origin 0
+      const primaryIdx = product.images.findIndex((img: any) => img.is_primary);
+      setCurrentIndex(primaryIdx >= 0 ? primaryIdx : 0);
+    } else {
+      setCurrentIndex(0);
     }
   }, [product]);
 
-  // Handle loading firmly verifying safe boundaries preserving 404 pipelines
   if (loading) {
     return (
       <div className="min-h-screen bg-obsidian-black flex items-center justify-center">
@@ -42,7 +71,6 @@ export default function ProductDetailPage({ lang }: { lang: Lang }) {
     );
   }
 
-  // Check if product exists physically shielding undefined renders internally
   if (error || !product) {
     return (
       <div className="min-h-screen bg-obsidian-black flex flex-col items-center justify-center p-4">
@@ -67,9 +95,24 @@ export default function ProductDetailPage({ lang }: { lang: Lang }) {
     );
   }
 
+  // Pre-calculate array boundaries cleanly
+  const images = product.images || [];
+
   const getImageUrl = (path?: string) => {
     if (!path) return '/placeholder.jpg';
     return path.startsWith('http') ? path : `http://127.0.0.1:8000${path}`;
+  };
+
+  const paginate = (newDirection: number) => {
+    if (images.length <= 1) return;
+    setDirection(newDirection);
+    setCurrentIndex((prev) => {
+      let next = prev + newDirection;
+      // Infinite Pagination Loop Handlers
+      if (next < 0) next = images.length - 1;
+      if (next >= images.length) next = 0;
+      return next;
+    });
   };
 
   const handleAddToCart = () => {
@@ -78,7 +121,7 @@ export default function ProductDetailPage({ lang }: { lang: Lang }) {
       name: product.name,
       nameEs: product.name,
       price: parseFloat(product.price.toString()),
-      image: activeImage ? getImageUrl(activeImage.image) : '/images/hero_glove.png',
+      image: images.length > 0 ? getImageUrl(images[currentIndex].image) : '/images/hero_glove.png',
       size: product.size || 'M',
       variant: `${product.category || 'Standard'} / Black`
     });
@@ -86,7 +129,7 @@ export default function ProductDetailPage({ lang }: { lang: Lang }) {
   };
 
   return (
-    <div className="min-h-screen bg-obsidian-black text-white pt-24 pb-32 selection:bg-kevin-violet/30">
+    <div className="min-h-screen bg-obsidian-black text-white pt-24 pb-32 selection:bg-kevin-violet/30 overflow-x-hidden">
       <div className="noise-overlay" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -100,54 +143,91 @@ export default function ProductDetailPage({ lang }: { lang: Lang }) {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 relative z-10 w-full">
           
-          {/* PART 2: THE COMPONENT STRUCTURE - MAIN GALLERY */}
+          {/* PART 2: THE COMPONENT STRUCTURE - LUXURY SLIDER */}
           <div className="flex flex-col gap-4">
             
-            {/* 1. Main Image Container */}
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              className="relative aspect-square w-full rounded-2xl overflow-hidden bg-[#000000] border border-zinc-800"
-            >
-              <motion.img
-                key={activeImage?.id || 'main-fallback'}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.3, ease: 'easeOut' }}
-                src={activeImage ? getImageUrl(activeImage.image) : '/placeholder.jpg'}
-                alt={product.name}
-                className="w-full h-full object-cover object-center"
-              />
-              <div className="absolute top-4 left-4 bg-black/80 backdrop-blur-md px-3 py-1 font-mono text-[10px] tracking-widest uppercase border border-zinc-800 text-zinc-400">
+            {/* Main Interactive Slide Container */}
+            <div className="relative aspect-square w-full rounded-2xl overflow-hidden bg-[#000000] border border-zinc-800 group/slider">
+              
+              {/* Force mapping bounds dynamically securely trapping empty queries */}
+              {images.length > 0 ? (
+                <AnimatePresence initial={false} custom={direction}>
+                  <motion.img
+                    key={currentIndex}
+                    src={getImageUrl(images[currentIndex].image)}
+                    custom={direction}
+                    variants={slideVariants}
+                    initial="enter"
+                    animate="center"
+                    exit="exit"
+                    transition={{
+                      x: { type: "spring", stiffness: 300, damping: 30 },
+                      opacity: { duration: 0.2 }
+                    }}
+                    drag={images.length > 1 ? "x" : false}
+                    dragConstraints={{ left: 0, right: 0 }}
+                    dragElastic={1}
+                    onDragEnd={(e, { offset, velocity }) => {
+                      const swipe = swipePower(offset.x, velocity.x);
+                      if (swipe < -swipeConfidenceThreshold) {
+                        paginate(1);
+                      } else if (swipe > swipeConfidenceThreshold) {
+                        paginate(-1);
+                      }
+                    }}
+                    alt={product.name}
+                    className="absolute inset-0 w-full h-full object-cover object-center cursor-grab active:cursor-grabbing"
+                  />
+                </AnimatePresence>
+              ) : (
+                <img 
+                  src="/placeholder.jpg" 
+                  alt="Fallback" 
+                  className="absolute inset-0 w-full h-full object-cover object-center" 
+                />
+              )}
+
+              {/* ARROWS: Desktop hover overlays conditionally hidden natively on Mobile interfaces using Tailwind bounds */}
+              {images.length > 1 && (
+                <>
+                  <button 
+                    className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-black/50 backdrop-blur-md border border-white/10 text-white items-center justify-center opacity-0 group-hover/slider:opacity-100 transition-all duration-300 hover:bg-black hover:border-[#8A2BE2] z-10 hidden sm:flex"
+                    onClick={() => paginate(-1)}
+                  >
+                    <ChevronLeft size={24} />
+                  </button>
+                  <button 
+                    className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-black/50 backdrop-blur-md border border-white/10 text-white items-center justify-center opacity-0 group-hover/slider:opacity-100 transition-all duration-300 hover:bg-black hover:border-[#8A2BE2] z-10 hidden sm:flex"
+                    onClick={() => paginate(1)}
+                  >
+                    <ChevronRight size={24} />
+                  </button>
+                </>
+              )}
+
+              {/* PAGINATION DOTS */}
+              {images.length > 1 && (
+                <div className="absolute bottom-6 left-0 right-0 flex justify-center gap-3 z-10">
+                  {images.map((_: any, idx: number) => (
+                    <button
+                      key={idx}
+                      onClick={() => {
+                        setDirection(idx > currentIndex ? 1 : -1);
+                        setCurrentIndex(idx);
+                      }}
+                      className={`h-2 rounded-full transition-all duration-300 ${
+                        idx === currentIndex ? 'bg-[#8A2BE2] w-8' : 'bg-white/30 w-2 hover:bg-white/60'
+                      }`}
+                    />
+                  ))}
+                </div>
+              )}
+
+              <div className="absolute top-4 left-4 bg-black/80 backdrop-blur-md px-3 py-1 font-mono text-[10px] tracking-widest uppercase border border-zinc-800 text-zinc-400 z-10">
                 // {product.category || 'CORE'}
               </div>
-            </motion.div>
 
-            {/* 2. Thumbnail List strictly isolated executing cleanly preventing crash cycles */}
-            {product?.images && product.images.length > 0 && (
-              <div className="flex flex-wrap gap-3 mt-2">
-                {product.images.map((img: any) => {
-                  const isActive = activeImage?.id === img.id;
-                  return (
-                    <button
-                      key={img.id}
-                      onClick={() => setActiveImage(img)}
-                      className={`w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden bg-[#000000] border-2 transition-transform hover:scale-105 ${
-                        isActive 
-                          ? 'border-[#8A2BE2] opacity-100' 
-                          : 'border-transparent opacity-50 hover:opacity-100'
-                      }`}
-                    >
-                      <img
-                        src={getImageUrl(img.image)}
-                        alt={`Thumbnail ${img.id}`}
-                        className="w-full h-full object-cover"
-                      />
-                    </button>
-                  );
-                })}
-              </div>
-            )}
+            </div>
           </div>
 
           {/* Right Column: Details */}
@@ -158,7 +238,7 @@ export default function ProductDetailPage({ lang }: { lang: Lang }) {
           >
             <div className="mb-8">
               {product.collection_type === 'DROP' && (
-                <div className="inline-block px-3 py-1 bg-kevin-violet/10 border border-kevin-violet/30 text-kevin-glow text-xs font-mono mb-4 rounded uppercase tracking-widest">
+                <div className="inline-block px-3 py-1 bg-kevin-violet/10 border border-[#8A2BE2]/30 text-kevin-glow text-xs font-mono mb-4 rounded uppercase tracking-widest">
                   {lang === 'es' ? 'Edición Limitada' : 'Limited Edition'}
                 </div>
               )}
@@ -176,17 +256,17 @@ export default function ProductDetailPage({ lang }: { lang: Lang }) {
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10 border-y border-zinc-800/60 py-8">
               <div className="flex flex-col gap-2">
-                <ShieldCheck strokeWidth={1} className="text-kevin-violet" />
+                <ShieldCheck strokeWidth={1} className="text-[#8A2BE2]" />
                 <span className="text-xs uppercase tracking-widest font-bold">Premium Leather</span>
                 <span className="text-xs text-zinc-500">Cabretta Grade-A</span>
               </div>
               <div className="flex flex-col gap-2">
-                <Wind strokeWidth={1} className="text-kevin-violet" />
+                <Wind strokeWidth={1} className="text-[#8A2BE2]" />
                 <span className="text-xs uppercase tracking-widest font-bold">Climate Control</span>
                 <span className="text-xs text-zinc-500">Micro-fiber lining</span>
               </div>
               <div className="flex flex-col gap-2">
-                <Ruler strokeWidth={1} className="text-kevin-violet" />
+                <Ruler strokeWidth={1} className="text-[#8A2BE2]" />
                 <span className="text-xs uppercase tracking-widest font-bold">True Fit</span>
                 <span className="text-xs text-zinc-500">Ergonomic cut</span>
               </div>
