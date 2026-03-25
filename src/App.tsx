@@ -3,14 +3,14 @@ import { BrowserRouter, Routes, Route, useLocation, useNavigate } from 'react-ro
 import { AnimatePresence, motion } from 'framer-motion';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
-import ShopSection from './components/ShopSection';
-import Features from './components/Features';
+
 import Footer from './components/Footer';
 import CartDrawer from './components/CartDrawer';
 import AuthPage from './pages/AuthPage';
 import UserDashboard from './pages/UserDashboard';
 import Checkout from './pages/Checkout';
 import ProductDetailPage from './pages/ProductDetailPage';
+import CatalogPage from './pages/CatalogPage';
 import VerifyEmailPage from './pages/VerifyEmailPage';
 import type { Lang } from './types';
 import './index.css';
@@ -68,8 +68,8 @@ function RouterApp() {
             </motion.div>
           } />
 
-          {/* Catch-all Homepage Route */}
-          <Route path="*" element={
+          {/* Catch-all Homepage Route - Only shows Hero now */}
+          <Route path="/" element={
             <motion.div {...pageTransition}>
               <div className="min-h-screen bg-obsidian-black text-obsidian-text antialiased">
                 <div className="noise-overlay" aria-hidden="true" />
@@ -80,8 +80,42 @@ function RouterApp() {
                 />
                 <main>
                   <Hero lang={lang} />
-                  <ShopSection lang={lang} />
-                  <Features lang={lang} />
+                </main>
+                <Footer lang={lang} />
+              </div>
+            </motion.div>
+          } />
+
+          {/* Drops Page Map */}
+          <Route path="/drops" element={
+            <motion.div {...pageTransition}>
+              <div className="min-h-screen bg-obsidian-black text-obsidian-text antialiased">
+                <div className="noise-overlay" aria-hidden="true" />
+                <Navbar
+                  lang={lang}
+                  onToggleLang={() => setLang((prev) => (prev === 'es' ? 'en' : 'es'))}
+                  onOpenAuth={() => navigate('/dashboard')} 
+                />
+                <main>
+                  <CatalogPage lang={lang} type="DROP" />
+                </main>
+                <Footer lang={lang} />
+              </div>
+            </motion.div>
+          } />
+
+          {/* Core Collection Map */}
+          <Route path="/core" element={
+            <motion.div {...pageTransition}>
+              <div className="min-h-screen bg-obsidian-black text-obsidian-text antialiased">
+                <div className="noise-overlay" aria-hidden="true" />
+                <Navbar
+                  lang={lang}
+                  onToggleLang={() => setLang((prev) => (prev === 'es' ? 'en' : 'es'))}
+                  onOpenAuth={() => navigate('/dashboard')} 
+                />
+                <main>
+                  <CatalogPage lang={lang} type="CORE" />
                 </main>
                 <Footer lang={lang} />
               </div>

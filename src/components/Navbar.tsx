@@ -1,7 +1,7 @@
 import { ShoppingCart, User, Menu, X } from 'lucide-react';
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import type { Lang } from '../types';
-import { t } from '../i18n/translations';
 import { useCartStore } from '../store/useCartStore';
 
 interface NavbarProps {
@@ -16,9 +16,8 @@ export default function Navbar({ lang, onToggleLang, onOpenAuth }: NavbarProps) 
   const totalItems = useCartStore((s) => s.totalItems());
 
   const navLinks = [
-    { key: 'nav.drop', href: '#drop' },
-    { key: 'nav.collection', href: '#features' },
-    { key: 'nav.story', href: '#story' },
+    { key: 'DROPS', href: '/drops' },
+    { key: 'CORE', href: '/core' }
   ];
 
   return (
@@ -26,7 +25,7 @@ export default function Navbar({ lang, onToggleLang, onOpenAuth }: NavbarProps) 
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
 
         {/* ─── Logo ─── */}
-        <a href="#" className="flex items-center gap-2 shrink-0">
+        <Link to="/" className="flex items-center gap-2 shrink-0">
           <span
             className="text-xl font-black tracking-[0.25em] text-white uppercase"
             style={{
@@ -36,17 +35,17 @@ export default function Navbar({ lang, onToggleLang, onOpenAuth }: NavbarProps) 
           >
             OBSIDIAN
           </span>
-          <span className="hidden sm:inline-block text-[10px] text-kevin-base font-mono tracking-widest border border-kevin-base/40 px-1.5 py-0.5 rounded">
-            DROP
+          <span className="hidden sm:inline-block text-[10px] text-kevin-base font-mono tracking-widest border border-[#8A2BE2]/40 px-1.5 py-0.5 rounded text-[#8A2BE2]">
+            APP
           </span>
-        </a>
+        </Link>
 
         {/* ─── Center Links (Desktop) ─── */}
         <div className="hidden md:flex items-center gap-8">
           {navLinks.map((link) => (
-            <a key={link.key} href={link.href} className="nav-link">
-              {t(lang, link.key)}
-            </a>
+            <Link key={link.key} to={link.href} className="text-zinc-400 hover:text-white transition-colors font-bold tracking-widest text-sm">
+              {link.key}
+            </Link>
           ))}
         </div>
 
@@ -101,14 +100,14 @@ export default function Navbar({ lang, onToggleLang, onOpenAuth }: NavbarProps) 
       {mobileOpen && (
         <div className="md:hidden glass border-t border-[#18181B] px-4 py-4 flex flex-col gap-4">
           {navLinks.map((link) => (
-            <a
+            <Link
               key={link.key}
-              href={link.href}
-              className="nav-link py-2"
+              to={link.href}
+              className="text-white font-bold tracking-widest py-2 active:bg-zinc-800"
               onClick={() => setMobileOpen(false)}
             >
-              {t(lang, link.key)}
-            </a>
+              {link.key}
+            </Link>
           ))}
           <button
             onClick={onToggleLang}
