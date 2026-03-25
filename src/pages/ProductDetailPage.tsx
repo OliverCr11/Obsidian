@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { ShoppingBag, ArrowLeft, Ruler, ShieldCheck, Wind, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useProductDetail } from '../hooks/useProductDetail';
 import { useCartStore } from '../store/useCartStore';
@@ -12,26 +12,7 @@ const swipePower = (offset: number, velocity: number) => {
   return Math.abs(offset) * velocity;
 };
 
-const slideVariants = {
-  enter: (direction: number) => {
-    return {
-      x: direction > 0 ? 500 : -500,
-      opacity: 0
-    };
-  },
-  center: {
-    zIndex: 1,
-    x: 0,
-    opacity: 1
-  },
-  exit: (direction: number) => {
-    return {
-      zIndex: 0,
-      x: direction < 0 ? 500 : -500,
-      opacity: 0
-    };
-  }
-};
+
 
 export default function ProductDetailPage({ lang }: { lang: Lang }) {
   const { slug } = useParams<{ slug: string }>();
@@ -42,7 +23,6 @@ export default function ProductDetailPage({ lang }: { lang: Lang }) {
 
   // PART 1: ROBUST STATE LOGIC FOR SLIDER
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [direction, setDirection] = useState(0);
 
   // Scroll to top on mount
   useEffect(() => {
@@ -105,7 +85,6 @@ export default function ProductDetailPage({ lang }: { lang: Lang }) {
 
   const paginate = (newDirection: number) => {
     if (images.length <= 1) return;
-    setDirection(newDirection);
     setCurrentIndex((prev) => {
       let next = prev + newDirection;
       // Infinite Pagination Loop Handlers
@@ -146,39 +125,37 @@ export default function ProductDetailPage({ lang }: { lang: Lang }) {
           {/* PART 2: THE COMPONENT STRUCTURE - LUXURY SLIDER */}
           <div className="flex flex-col gap-4">
             
-            {/* Main Interactive Slide Container */}
+            {/* Main Interactive Slide Container - CSS HARDWARE ACCELERATED */}
             <div className="relative aspect-square w-full rounded-2xl overflow-hidden bg-[#000000] border border-zinc-800 group/slider">
               
-              {/* Force mapping bounds dynamically securely trapping empty queries */}
+              {/* Force mapping bounds dynamically securely wrapping flex tracks */}
               {images.length > 0 ? (
-                <AnimatePresence initial={false} custom={direction}>
-                  <motion.img
-                    key={currentIndex}
-                    src={getImageUrl(images[currentIndex].image)}
-                    custom={direction}
-                    variants={slideVariants}
-                    initial="enter"
-                    animate="center"
-                    exit="exit"
-                    transition={{
-                      x: { type: "spring", stiffness: 300, damping: 30 },
-                      opacity: { duration: 0.2 }
-                    }}
-                    drag={images.length > 1 ? "x" : false}
-                    dragConstraints={{ left: 0, right: 0 }}
-                    dragElastic={1}
-                    onDragEnd={(e, { offset, velocity }) => {
-                      const swipe = swipePower(offset.x, velocity.x);
-                      if (swipe < -swipeConfidenceThreshold) {
-                        paginate(1);
-                      } else if (swipe > swipeConfidenceThreshold) {
-                        paginate(-1);
-                      }
-                    }}
-                    alt={product.name}
-                    className="absolute inset-0 w-full h-full object-cover object-center cursor-grab active:cursor-grabbing"
-                  />
-                </AnimatePresence>
+                <motion.div
+                  className="flex w-full h-full"
+                  animate={{ x: `-${currentIndex * 100}%` }}
+                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                  drag={images.length > 1 ? "x" : false}
+                  dragConstraints={{ left: 0, right: 0 }}
+                  dragElastic={1}
+                  onDragEnd={(e, { offset, velocity }) => {
+                    const swipe = swipePower(offset.x, velocity.x);
+                    if (swipe < -swipeConfidenceThreshold) {
+                      paginate(1);
+                    } else if (swipe > swipeConfidenceThreshold) {
+                      paginate(-1);
+                    }
+                  }}
+                >
+                  {images.map((img: any) => (
+                    <div key={img.id} className="min-w-full h-full flex-shrink-0 relative">
+                      <img
+                        src={getImageUrl(img.image)}
+                        alt={product.name}
+                        className="absolute inset-0 w-full h-full object-cover object-center pointer-events-none"
+                      />
+                    </div>
+                  ))}
+                </motion.div>
               ) : (
                 <img 
                   src="/placeholder.jpg" 
@@ -212,7 +189,6 @@ export default function ProductDetailPage({ lang }: { lang: Lang }) {
                     <button
                       key={idx}
                       onClick={() => {
-                        setDirection(idx > currentIndex ? 1 : -1);
                         setCurrentIndex(idx);
                       }}
                       className={`h-2 rounded-full transition-all duration-300 ${
