@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import type { Glove } from '../types';
 
-export function useProducts() {
+export function useProducts(collectionType?: 'DROP' | 'CORE') {
   const [products, setProducts] = useState<Glove[]>([]);
   const [dropProduct, setDropProduct] = useState<Glove | null>(null);
   const [coreProducts, setCoreProducts] = useState<Glove[]>([]);
@@ -11,7 +11,10 @@ export function useProducts() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await fetch('http://127.0.0.1:8000/api/products/');
+        const url = collectionType 
+          ? `http://127.0.0.1:8000/api/products/?collection_type=${collectionType}`
+          : 'http://127.0.0.1:8000/api/products/';
+        const response = await fetch(url);
         if (!response.ok) {
           throw new Error('Failed to fetch products');
         }
@@ -33,7 +36,7 @@ export function useProducts() {
     };
 
     fetchProducts();
-  }, []);
+  }, [collectionType]);
 
   return { products, dropProduct, coreProducts, loading, error };
 }

@@ -11,12 +11,12 @@ interface CatalogPageProps {
 }
 
 export default function CatalogPage({ lang, type }: CatalogPageProps) {
-  const { products, loading, error } = useProducts();
+  const { products, loading, error } = useProducts(type);
   const addItem = useCartStore((s) => s.addItem);
   const openCart = useCartStore((s) => s.openCart);
 
-  // Directly filter based on Category constraint
-  const filteredProducts = products.filter((p: any) => p.collection_type === type);
+  // Filtering is now securely handled by the Django backend natively!
+  const filteredProducts = products;
 
   const getDisplayImage = (glove: any) => {
     const path = glove.images?.find((img: any) => img.is_primary)?.image || glove.images?.[0]?.image;
