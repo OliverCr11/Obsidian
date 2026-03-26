@@ -15,8 +15,13 @@ type Tab = 'profile' | 'orders' | 'settings';
 
 export default function UserDashboard({ lang, onBack }: UserDashboardProps) {
   const [activeTab, setActiveTab] = useState<Tab>('orders');
+  const [expandedOrders, setExpandedOrders] = useState<string[]>([]);
   const { logout } = useAuth();
   const { orders, loading, error } = useOrders();
+
+  const toggleOrder = (id: string) => {
+    setExpandedOrders(prev => prev.includes(id) ? prev.filter(o => o !== id) : [...prev, id]);
+  };
 
   // ─── BILINGUAL DICTIONARY ───
   const dict = {
@@ -207,68 +212,84 @@ export default function UserDashboard({ lang, onBack }: UserDashboardProps) {
                       </div>
                     )}
 
-                    {!loading && !error && orders.map((order) => (
-                      <div
-                        key={order.id || order.order_id}
-                        className="group flex flex-col p-4 hover:bg-zinc-900/50 transition-colors"
-                      >
-                        <div className="grid grid-cols-1 md:grid-cols-12 gap-4 md:items-center">
-                          {/* Mobile Header */}
-                          <div className="flex justify-between items-center md:hidden mb-2">
-                            <span className="text-white font-mono text-sm font-bold">{order.order_id.split('-')[0]}...</span>
-                            <span className={`px-2.5 py-1 rounded-sm text-[10px] font-mono font-bold uppercase border ${getStatusColor(order.status)}`}>
-                              {translateStatus(order.status)}
-                            </span>
-                          </div>
+                    {!loading && !error && orders.map((order) => {
+                      const isExpanded = expandedOrders.includes(order.order_id);
+                      return (
+                        <div
+                          key={order.id || order.order_id}
+                          className="group flex flex-col hover:bg-zinc-900/30 transition-colors"
+                        >
+                          {/* Main Clickable Row */}
+                          <button 
+                            onClick={() => toggleOrder(order.order_id)}
+                            className="grid grid-cols-1 md:grid-cols-12 gap-4 p-4 md:items-center w-full text-left"
+                          >
+                            {/* Mobile Header */}
+                            <div className="flex justify-between items-center md:hidden mb-2">
+                              <span className="text-white font-mono text-sm font-bold">{order.order_id.split('-')[0]}...</span>
+                              <span className={`px-2.5 py-1 rounded-sm text-[10px] font-mono font-bold uppercase border ${getStatusColor(order.status)}`}>
+                                {translateStatus(order.status)}
+                              </span>
+                            </div>
 
-                          <div className="hidden md:block col-span-3 text-white font-mono text-xs tracking-wider opacity-80 truncate pr-4">
-                            {order.order_id}
-                          </div>
-                          <div className="col-span-3 text-zinc-400 font-mono text-xs tracking-wider">
-                            {new Date(order.created_at).toLocaleDateString()}
-                          </div>
-                          <div className="hidden md:block col-span-3">
-                            <span className={`px-2.5 py-1 rounded-sm text-[10px] font-mono font-bold uppercase border ${getStatusColor(order.status)}`}>
-                              {translateStatus(order.status)}
-                            </span>
-                          </div>
-                          <div className="col-span-2 text-left md:text-right font-mono text-white text-sm">
-                            ${Number(order.total_paid).toFixed(2)}
-                            <span className="text-[#8A2BE2] ml-1">USD</span>
-                          </div>
-                          <div className="hidden md:flex col-span-1 justify-end">
-                            <button className="h-8 w-8 rounded flex items-center justify-center text-zinc-600 group-hover:bg-[#8A2BE2]/10 group-hover:text-[#8A2BE2] transition-colors border border-transparent group-hover:border-[#8A2BE2]/30">
-                              <ChevronRight size={18} />
-                            </button>
-                          </div>
-                        </div>
-
-                        {/* ─── NESTED ITEM THUMBNAILS ─── */}
-                        {order.items && order.items.length > 0 && (
-                          <div className="mt-4 pt-4 border-t border-zinc-900 flex gap-3 overflow-x-auto pb-2 custom-scrollbar">
-                            {order.items.map((item, idx) => (
-                              <div key={idx} className="flex items-center gap-3 bg-[#0a0a0a] border border-zinc-800 p-2 rounded shrink-0 min-w-[200px] hover:border-[#8A2BE2]/40 transition-colors">
-                                <div className="w-12 h-12 rounded bg-black overflow-hidden shrink-0 border border-zinc-800 flex items-center justify-center relative">
-                                  <img 
-                                    src={item.glove_image || '/placeholder.jpg'} 
-                                    className="absolute inset-0 w-full h-full object-cover object-center" 
-                                    alt="Product Thumbnail" 
-                                  />
-                                </div>
-                                <div className="flex flex-col">
-                                  <span className="text-white font-bold tracking-wider text-[10px] uppercase line-clamp-1">
-                                    {lang === 'es' ? (item.glove_name_es || item.glove_name) : item.glove_name}
-                                  </span>
-                                  <span className="text-zinc-500 font-mono text-[10px] tracking-widest mt-0.5">
-                                    QTY: {item.quantity}
-                                  </span>
-                                </div>
+                            <div className="hidden md:block col-span-3 text-white font-mono text-xs tracking-wider opacity-80 truncate pr-4">
+                              {order.order_id}
+                            </div>
+                            <div className="col-span-3 text-zinc-400 font-mono text-xs tracking-wider">
+                              {new Date(order.created_at).toLocaleDateString()}
+                            </div>
+                            <div className="hidden md:block col-span-3">
+                              <span className={`px-2.5 py-1 rounded-sm text-[10px] font-mono font-bold uppercase border ${getStatusColor(order.status)}`}>
+                                {translateStatus(order.status)}
+                              </span>
+                            </div>
+                            <div className="col-span-2 text-left md:text-right font-mono text-white text-sm">
+                              ${Number(order.total_paid).toFixed(2)}
+                              <span className="text-[#8A2BE2] ml-1">USD</span>
+                            </div>
+                            <div className="hidden md:flex col-span-1 justify-end">
+                              <div className={`h-8 w-8 rounded flex items-center justify-center text-zinc-600 group-hover:bg-[#8A2BE2]/10 transition-all border border-transparent group-hover:border-[#8A2BE2]/30 ${isExpanded ? 'rotate-90 text-[#8A2BE2] border-[#8A2BE2]/50 bg-[#8A2BE2]/20' : 'group-hover:text-[#8A2BE2]'}`}>
+                                <ChevronRight size={18} />
                               </div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    ))}
+                            </div>
+                          </button>
+
+                          {/* ─── NESTED ITEM THUMBNAILS (ACCORDION) ─── */}
+                          <AnimatePresence>
+                            {isExpanded && order.items && order.items.length > 0 && (
+                              <motion.div
+                                initial={{ height: 0, opacity: 0 }}
+                                animate={{ height: "auto", opacity: 1 }}
+                                exit={{ height: 0, opacity: 0 }}
+                                className="overflow-hidden"
+                              >
+                                <div className="p-4 pt-1 border-t border-zinc-900/50 flex gap-3 overflow-x-auto pb-4 custom-scrollbar bg-black/40">
+                                  {order.items.map((item, idx) => (
+                                    <div key={idx} className="flex items-center gap-3 bg-[#0a0a0a] border border-zinc-800 p-2 rounded shrink-0 min-w-[200px] hover:border-[#8A2BE2]/40 transition-colors">
+                                      <div className="w-12 h-12 rounded bg-black overflow-hidden shrink-0 border border-zinc-800 flex items-center justify-center relative">
+                                        <img 
+                                          src={item.glove_image || '/placeholder.jpg'} 
+                                          className="absolute inset-0 w-full h-full object-cover object-center" 
+                                          alt="Product Thumbnail" 
+                                        />
+                                      </div>
+                                      <div className="flex flex-col">
+                                        <span className="text-white font-bold tracking-wider text-[10px] uppercase line-clamp-1">
+                                          {lang === 'es' ? (item.glove_name_es || item.glove_name) : item.glove_name}
+                                        </span>
+                                        <span className="text-zinc-500 font-mono text-[10px] tracking-widest mt-0.5">
+                                          QTY: {item.quantity}
+                                        </span>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               </div>
