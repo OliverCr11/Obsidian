@@ -6,6 +6,9 @@ export interface OrderItem {
   id: number;
   quantity: number;
   price: number | string;
+  glove_name?: string;
+  glove_name_es?: string;
+  glove_image?: string;
 }
 
 export interface Order {
@@ -34,7 +37,7 @@ export function useOrders() {
       }
 
       try {
-        const res = await fetch(`${API_BASE}/orders/`, {
+        const res = await fetch(`${API_BASE}/orders/my-orders/`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
