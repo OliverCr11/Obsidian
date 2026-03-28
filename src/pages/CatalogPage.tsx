@@ -3,14 +3,14 @@ import { Link } from 'react-router-dom';
 import { useProducts } from '../hooks/useProducts';
 import { useCartStore } from '../store/useCartStore';
 import { ShoppingBag } from 'lucide-react';
-import type { Lang } from '../types';
+import type { Lang, Glove } from '../types';
 
 interface CatalogPageProps {
   lang: Lang;
   type: 'DROP' | 'CORE';
 }
 
-export default function CatalogPage({ lang, type }: CatalogPageProps) {
+export default function CatalogPage({ type }: CatalogPageProps) {
   const { products, loading, error } = useProducts(type);
   const addItem = useCartStore((s) => s.addItem);
   const openCart = useCartStore((s) => s.openCart);
@@ -18,8 +18,8 @@ export default function CatalogPage({ lang, type }: CatalogPageProps) {
   // Filtering is now securely handled by the Django backend natively!
   const filteredProducts = products;
 
-  const getDisplayImage = (glove: any) => {
-    const path = glove.images?.find((img: any) => img.is_primary)?.image || glove.images?.[0]?.image;
+  const getDisplayImage = (glove: Glove) => {
+    const path = glove.images?.find((img) => img.is_primary)?.image || glove.images?.[0]?.image;
     if (!path) return '/images/hero_glove.png';
     return path.startsWith('http') ? path : `http://127.0.0.1:8000${path}`;
   };
@@ -74,7 +74,7 @@ export default function CatalogPage({ lang, type }: CatalogPageProps) {
         )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {filteredProducts.map((glove: any) => (
+          {filteredProducts.map((glove: Glove) => (
             <div key={glove.id} className="group relative glass rounded-xl overflow-hidden hover:border-[#8A2BE2]/50 transition-colors">
               
               <Link to={`/product/${glove.slug}`} className="block aspect-square bg-zinc-900/50 relative overflow-hidden flex items-center justify-center p-8 group-hover:bg-zinc-900/80 transition-colors">
