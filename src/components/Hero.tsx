@@ -5,6 +5,8 @@ import { useCartStore } from '../store/useCartStore';
 import { useProducts } from '../hooks/useProducts';
 import { t } from '../i18n/translations';
 
+const baseURL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
+
 interface HeroProps {
   lang: Lang;
 }
@@ -58,7 +60,7 @@ export default function Hero({ lang }: HeroProps) {
     if (!product) return '/images/hero_glove.png';
     const path = product.images?.find((img: any) => img.is_primary)?.image || product.images?.[0]?.image;
     if (!path) return '/images/hero_glove.png';
-    return path.startsWith('http') ? path : `http://127.0.0.1:8000${path}`;
+    return path.startsWith('http') ? path : `${baseURL}${path}`;
   };
   
   // Wrapped in useEffect to prevent the countdown timer from spamming the console

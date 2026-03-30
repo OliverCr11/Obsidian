@@ -5,6 +5,7 @@ import { useCartStore } from '../store/useCartStore';
 import { ShoppingBag } from 'lucide-react';
 import type { Lang } from '../types';
 
+const baseURL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
 
 interface ShopSectionProps {
   lang: Lang;
@@ -25,7 +26,7 @@ export default function ShopSection({ lang }: ShopSectionProps) {
   const getDisplayImage = (glove: any) => {
     const path = glove.images?.find((img: any) => img.is_primary)?.image || glove.images?.[0]?.image;
     if (!path) return '/images/hero_glove.png';
-    return path.startsWith('http') ? path : `http://127.0.0.1:8000${path}`;
+    return path.startsWith('http') ? path : `${baseURL}${path}`;
   };
 
   return (

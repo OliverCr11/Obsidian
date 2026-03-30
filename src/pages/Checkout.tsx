@@ -6,6 +6,8 @@ import { useAuthStore } from '../store/useAuthStore';
 import CouponInput from '../components/CouponInput';
 import type { Lang } from '../types';
 
+const baseURL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
+
 interface CheckoutProps {
   lang: Lang;
   onBack: () => void;
@@ -56,7 +58,7 @@ export default function Checkout({ lang, onBack, onSuccess }: CheckoutProps) {
     const token = localStorage.getItem('token') || localStorage.getItem('access_token');
 
     try {
-      const res = await fetch('http://127.0.0.1:8000/api/orders/create/', {
+      const res = await fetch(`${baseURL}/api/orders/create/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

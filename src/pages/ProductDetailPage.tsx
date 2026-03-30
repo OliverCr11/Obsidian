@@ -6,6 +6,8 @@ import { useProductDetail } from '../hooks/useProductDetail';
 import { useCartStore } from '../store/useCartStore';
 import type { Lang } from '../types';
 
+const baseURL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
+
 // SLIDER ANIMATION VARIANTS
 const swipeConfidenceThreshold = 10000;
 const swipePower = (offset: number, velocity: number) => {
@@ -80,7 +82,7 @@ export default function ProductDetailPage({ lang }: { lang: Lang }) {
 
   const getImageUrl = (path?: string) => {
     if (!path) return '/placeholder.jpg';
-    return path.startsWith('http') ? path : `http://127.0.0.1:8000${path}`;
+    return path.startsWith('http') ? path : `${baseURL}${path}`;
   };
 
   const paginate = (newDirection: number) => {

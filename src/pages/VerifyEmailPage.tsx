@@ -4,6 +4,8 @@ import { motion } from 'framer-motion';
 import { ShieldCheck, XCircle, Loader2 } from 'lucide-react';
 import type { Lang } from '../types';
 
+const baseURL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
+
 export default function VerifyEmailPage({ lang }: { lang: Lang }) {
   const { token } = useParams<{ token: string }>();
   const navigate = useNavigate();
@@ -15,7 +17,7 @@ export default function VerifyEmailPage({ lang }: { lang: Lang }) {
 
     const verifyEmail = async () => {
       try {
-        const res = await fetch(`http://127.0.0.1:8000/api/auth/verify/${token}/`);
+        const res = await fetch(`${baseURL}/api/auth/verify/${token}/`);
         const data = await res.json();
         
         if (res.ok) {

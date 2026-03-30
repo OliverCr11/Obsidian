@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import type { Glove } from '../types';
 
+const baseURL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
+
 export function useProductDetail(slug: string | undefined) {
   const [product, setProduct] = useState<Glove | null>(null);
   const [loading, setLoading] = useState(true);
@@ -16,7 +18,7 @@ export function useProductDetail(slug: string | undefined) {
     const fetchProduct = async () => {
       setLoading(true);
       try {
-        const response = await fetch(`http://127.0.0.1:8000/api/products/${slug}/`);
+        const response = await fetch(`${baseURL}/api/products/${slug}/`);
         
         if (!response.ok) {
           if (response.status === 404) {

@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { Loader2, Tag } from 'lucide-react';
 import { useCartStore } from '../store/useCartStore';
 
+const baseURL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
+
 export default function CouponInput() {
   const [code, setCode] = useState('');
   const [loading, setLoading] = useState(false);
@@ -18,7 +20,7 @@ export default function CouponInput() {
     setMessage(null);
 
     try {
-      const res = await fetch('http://127.0.0.1:8000/api/orders/apply-coupon/', {
+      const res = await fetch(`${baseURL}/api/orders/apply-coupon/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ code: code.trim().toUpperCase() })

@@ -5,6 +5,8 @@ import { useCartStore } from '../store/useCartStore';
 import { ShoppingBag } from 'lucide-react';
 import type { Lang, Glove } from '../types';
 
+const baseURL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
+
 interface CatalogPageProps {
   lang: Lang;
   type: 'DROP' | 'CORE';
@@ -21,7 +23,7 @@ export default function CatalogPage({ type }: CatalogPageProps) {
   const getDisplayImage = (glove: Glove) => {
     const path = glove.images?.find((img) => img.is_primary)?.image || glove.images?.[0]?.image;
     if (!path) return '/images/hero_glove.png';
-    return path.startsWith('http') ? path : `http://127.0.0.1:8000${path}`;
+    return path.startsWith('http') ? path : `${baseURL}${path}`;
   };
 
   const title = type === 'DROP' ? 'DROPS' : 'CORE COLLECTION';

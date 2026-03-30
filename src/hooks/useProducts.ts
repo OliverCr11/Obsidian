@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import type { Glove } from '../types';
 
+const baseURL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
+
 export function useProducts(collectionType?: 'DROP' | 'CORE') {
   const [products, setProducts] = useState<Glove[]>([]);
   const [dropProduct, setDropProduct] = useState<Glove | null>(null);
@@ -12,8 +14,8 @@ export function useProducts(collectionType?: 'DROP' | 'CORE') {
     const fetchProducts = async () => {
       try {
         const url = collectionType 
-          ? `http://127.0.0.1:8000/api/products/?collection_type=${collectionType}`
-          : 'http://127.0.0.1:8000/api/products/';
+          ? `${baseURL}/api/products/?collection_type=${collectionType}`
+          : `${baseURL}/api/products/`;
         const response = await fetch(url);
         if (!response.ok) {
           throw new Error('Failed to fetch products');
