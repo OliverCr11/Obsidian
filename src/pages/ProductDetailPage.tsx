@@ -123,13 +123,13 @@ export default function ProductDetailPage({ lang }: { lang: Lang }) {
         </button>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 relative z-10 w-full">
-          
+
           {/* PART 2: THE COMPONENT STRUCTURE - LUXURY SLIDER */}
           <div className="flex flex-col gap-4">
-            
+
             {/* Main Interactive Slide Container - CSS HARDWARE ACCELERATED */}
             <div className="relative aspect-square w-full rounded-2xl overflow-hidden bg-[#000000] border border-zinc-800 group/slider">
-              
+
               {/* Force mapping bounds dynamically securely wrapping flex tracks */}
               {images.length > 0 ? (
                 <motion.div
@@ -159,23 +159,23 @@ export default function ProductDetailPage({ lang }: { lang: Lang }) {
                   ))}
                 </motion.div>
               ) : (
-                <img 
-                  src="/placeholder.jpg" 
-                  alt="Fallback" 
-                  className="absolute inset-0 w-full h-full object-cover object-center" 
+                <img
+                  src="/placeholder.jpg"
+                  alt="Fallback"
+                  className="absolute inset-0 w-full h-full object-cover object-center"
                 />
               )}
 
               {/* ARROWS: Desktop hover overlays conditionally hidden natively on Mobile interfaces using Tailwind bounds */}
               {images.length > 1 && (
                 <>
-                  <button 
+                  <button
                     className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-black/50 backdrop-blur-md border border-white/10 text-white items-center justify-center opacity-0 group-hover/slider:opacity-100 transition-all duration-300 hover:bg-black hover:border-[#8A2BE2] z-10 hidden sm:flex"
                     onClick={() => paginate(-1)}
                   >
                     <ChevronLeft size={24} />
                   </button>
-                  <button 
+                  <button
                     className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-black/50 backdrop-blur-md border border-white/10 text-white items-center justify-center opacity-0 group-hover/slider:opacity-100 transition-all duration-300 hover:bg-black hover:border-[#8A2BE2] z-10 hidden sm:flex"
                     onClick={() => paginate(1)}
                   >
@@ -193,9 +193,8 @@ export default function ProductDetailPage({ lang }: { lang: Lang }) {
                       onClick={() => {
                         setCurrentIndex(idx);
                       }}
-                      className={`h-2 rounded-full transition-all duration-300 ${
-                        idx === currentIndex ? 'bg-[#8A2BE2] w-8' : 'bg-white/30 w-2 hover:bg-white/60'
-                      }`}
+                      className={`h-2 rounded-full transition-all duration-300 ${idx === currentIndex ? 'bg-[#8A2BE2] w-8' : 'bg-white/30 w-2 hover:bg-white/60'
+                        }`}
                     />
                   ))}
                 </div>

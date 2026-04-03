@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, useLocation, useNavigate } from 'react-ro
 import { AnimatePresence, motion } from 'framer-motion';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
+import MainDropHero from './components/MainDropHero';
 
 import Footer from './components/Footer';
 import CartDrawer from './components/CartDrawer';
@@ -79,7 +80,7 @@ function RouterApp() {
                   onOpenAuth={() => navigate('/dashboard')} 
                 />
                 <main>
-                  <Hero lang={lang} />
+                  <MainDropHero />
                 </main>
                 <Footer lang={lang} />
               </div>
