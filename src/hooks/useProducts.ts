@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import type { Glove } from '../types';
-
-const baseURL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
+import api from '../api/axios';
 
 export function useProducts(collectionType?: 'DROP' | 'CORE') {
   const [products, setProducts] = useState<Glove[]>([]);
@@ -13,14 +12,10 @@ export function useProducts(collectionType?: 'DROP' | 'CORE') {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const url = collectionType 
-          ? `${baseURL}/api/products/?collection_type=${collectionType}`
-          : `${baseURL}/api/products/`;
-        const response = await fetch(url);
-        if (!response.ok) {
-          throw new Error('Failed to fetch products');
-        }
-        const data = await response.json();
+        const url = collectionType ? `/products/?collection_type=${collectionType}` : `/products/`;
+        const response = await api.get(url);
+        const data = response.data;
+        
         setProducts(data);
         
         // Filter logic for Drop vs Core collections

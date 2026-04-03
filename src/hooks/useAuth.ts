@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/useAuthStore';
+import api from '../api/axios';
 
 const baseURL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
 const API_BASE = `${baseURL}/api`;
@@ -18,18 +19,8 @@ export function useAuth() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`${API_BASE}/auth/login/`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        // Native mirror of standard Django SimpleJWT requirements utilizing email mapping
-        body: JSON.stringify({ email, password, username: email })
-      });
-      
-      const data = await res.json();
-      
-      if (!res.ok) {
-        throw new Error(data.detail || 'Authentication failed');
-      }
+      const res = await api.post('/auth/login/', { email, password, username: email });
+      const data = res.data;
 
       setTokens(data.access, data.refresh);
       setUser({ email, name: email.split('@')[0] }); // Temporary name resolution fallback
@@ -55,28 +46,20 @@ export function useAuth() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`${API_BASE}/auth/register/`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        // Native mirror of standard Django AbstractBaseUser requirements utilizing email mapping
-        body: JSON.stringify({ email, password, first_name: name, username: email })
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        const rawErr = Object.values(data).flat().join(' ').toLowerCase();
-        if (rawErr.includes('already exists')) {
-          throw new Error('This email is already registered. Please log in instead.');
-        }
-        throw new Error(Object.values(data).flat().join(', ') || 'Registration failed');
-      }
+      const res = await api.post('/auth/register/', { email, password, first_name: name, username: email });
+      const data = res.data;
 
       // Explicitly decoupled auto-login chain to enforce post-registration UI feedback
       return true;
       
     } catch (err: any) {
-      setError(err.message || 'Network error');
+      const data = err.response?.data || {};
+      const rawErr = Object.values(data).flat().join(' ').toLowerCase();
+      if (rawErr.includes('already exists')) {
+        setError('This email is already registered. Please log in instead.');
+      } else {
+        setError(Object.values(data).flat().join(', ') || err.message || 'Network error');
+      }
       return false;
     } finally {
       setLoading(false);
@@ -87,17 +70,13 @@ export function useAuth() {
    * Generalized fetch wrapper auto-injecting the Bearer Token.
    * Drop this in over standard `fetch` for secure endpoints like Orders.
    */
-  const apiFetch = async (endpoint: string, options: RequestInit = {}) => {
-    const token = useAuthStore.getState().token;
-    const headers = new Headers(options.headers || {});
-    
-    if (token) {
-      headers.set('Authorization', `Bearer ${token}`);
-    }
-    
-    return fetch(endpoint.startsWith('http') ? endpoint : `${API_BASE}${endpoint}`, {
-      ...options,
-      headers
+  const apiFetch = async (endpoint: string, options: any = {}) => {
+    // Legacy bridge: using axios under the hood
+    const method = options.method?.toLowerCase() || 'get';
+    return api({
+      url: endpoint,
+      method: method,
+      data: options.body ? JSON.parse(options.body) : undefined,
     });
   };
 
