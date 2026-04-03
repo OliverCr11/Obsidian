@@ -3,22 +3,22 @@ import type { Glove } from '../types';
 
 const baseURL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
 
-export function useProductDetail(slug: string | undefined) {
+export function useProductDetail(id: string | undefined) {
   const [product, setProduct] = useState<Glove | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!slug) {
+    if (!id) {
       setLoading(false);
-      setError('Invalid product slug');
+      setError('Invalid product ID');
       return;
     }
 
     const fetchProduct = async () => {
       setLoading(true);
       try {
-        const response = await fetch(`${baseURL}/api/products/${slug}/`);
+        const response = await fetch(`${baseURL}/api/products/${id}/`);
         
         if (!response.ok) {
           if (response.status === 404) {
@@ -38,7 +38,7 @@ export function useProductDetail(slug: string | undefined) {
     };
 
     fetchProduct();
-  }, [slug]);
+  }, [id]);
 
   return { product, loading, error };
 }

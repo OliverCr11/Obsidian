@@ -17,9 +17,9 @@ const swipePower = (offset: number, velocity: number) => {
 
 
 export default function ProductDetailPage({ lang }: { lang: Lang }) {
-  const { slug } = useParams<{ slug: string }>();
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { product, loading, error } = useProductDetail(slug);
+  const { product, loading, error } = useProductDetail(id);
   const addItem = useCartStore((s) => s.addItem);
   const openCart = useCartStore((s) => s.openCart);
 
@@ -29,7 +29,7 @@ export default function ProductDetailPage({ lang }: { lang: Lang }) {
   // Scroll to top on mount
   useEffect(() => {
     window.scrollTo(0, 0);
-  }, [slug]);
+  }, [id]);
 
   // Reset index when product mounts safely capturing the Array limits
   useEffect(() => {

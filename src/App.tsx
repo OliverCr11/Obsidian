@@ -57,7 +57,7 @@ function RouterApp() {
             </motion.div>
           } />
           
-          <Route path="/product/:slug" element={
+          <Route path="/product/:id" element={
             <motion.div {...pageTransition} className="w-full">
               <ProductDetailPage lang={lang} />
             </motion.div>

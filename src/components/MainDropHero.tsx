@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { motion, useMotionValue, useTransform } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/axios';
+import { useCartStore } from '../store/useCartStore';
 
 interface HeroData {
   id: string | number;
@@ -20,6 +21,23 @@ export default function MainDropHero() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const navigate = useNavigate();
+
+  const addItem = useCartStore((s) => s.addItem);
+  const openCart = useCartStore((s) => s.openCart);
+
+  const handleAddToCart = () => {
+    if (!data) return;
+    addItem({
+      id: String(data.id),
+      name: data.name,
+      nameEs: data.name,
+      price: parseFloat(data.price),
+      image: data.image_url,
+      size: 'M',
+      variant: 'Edición Limitada'
+    });
+    openCart();
+  };
 
   // Parallax setup for a premium 3D feeling
   const x = useMotionValue(0);
@@ -99,12 +117,21 @@ export default function MainDropHero() {
           {/* Action Row */}
           <div className="w-full flex flex-col gap-6 items-start mt-2">
             <Countdown targetDate={data.countdown_target_date} />
-            <button 
-              onClick={() => navigate(`/product/${data.id}`)}
-              className="px-8 py-5 bg-gradient-to-r from-[#BB00FF] to-[#8800FF] text-white font-black uppercase tracking-[0.2em] hover:from-[#d033ff] hover:to-[#a033ff] transition-all duration-300 active:scale-95 rounded-sm shadow-[0_0_30px_rgba(187,0,255,0.4)] w-full sm:w-auto text-center"
-            >
-              PRE-ORDENAR AHORA - ${parseFloat(data.price).toFixed(2)}
-            </button>
+            <div className="flex flex-col sm:flex-row gap-4 items-center w-full">
+              <button 
+                onClick={handleAddToCart}
+                className="px-8 py-5 bg-gradient-to-r from-[#BB00FF] to-[#8800FF] text-white font-black uppercase tracking-[0.2em] hover:from-[#d033ff] hover:to-[#a033ff] transition-all duration-300 active:scale-95 rounded-sm shadow-[0_0_30px_rgba(187,0,255,0.4)] w-full sm:w-auto text-center"
+              >
+                PRE-ORDENAR AHORA - ${parseFloat(data.price).toFixed(2)}
+              </button>
+              
+              <button 
+                onClick={() => navigate(`/product/${data.id}`)}
+                className="text-zinc-400 hover:text-white uppercase tracking-widest text-xs font-bold underline transition-colors"
+              >
+                Ver Detalles
+              </button>
+            </div>
           </div>
         </div>
 
