@@ -1,7 +1,10 @@
 import axios from 'axios';
 
 // Get the API URL from environment variables (Vercel/Local)
-const baseURL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000/api/';
+let rootUrl = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
+rootUrl = rootUrl.replace(/\/+$/, ''); // Strip trailing slashes
+// Force /api ending if not explicitly provided
+const baseURL = rootUrl.endsWith('/api') ? rootUrl : `${rootUrl}/api`;
 
 // Create a centralized Axios instance
 const api = axios.create({
