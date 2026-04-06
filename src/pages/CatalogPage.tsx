@@ -12,7 +12,7 @@ interface CatalogPageProps {
   type: 'DROP' | 'CORE';
 }
 
-export default function CatalogPage({ type }: CatalogPageProps) {
+export default function CatalogPage({ type, lang }: CatalogPageProps) {
   const { products, loading, error } = useProducts(type);
   const addItem = useCartStore((s) => s.addItem);
   const openCart = useCartStore((s) => s.openCart);
@@ -26,10 +26,10 @@ export default function CatalogPage({ type }: CatalogPageProps) {
     return path.startsWith('http') ? path : `${baseURL}${path}`;
   };
 
-  const title = type === 'DROP' ? 'DROPS' : 'CORE COLLECTION';
+  const title = type === 'DROP' ? "THE FOUNDER'S DROPS" : "THE CORE COLLECTION";
   const desc = type === 'DROP' 
-    ? 'Exclusive tactical gear. Once sold out, never reproduced.' 
-    : 'Permanent tactical equipment. Built for the daily grind.';
+    ? (lang === 'es' ? "Ediciones estrictamente limitadas." : "Strictly limited editions.")
+    : (lang === 'es' ? "Rendimiento oscuro para el día a día." : "Dark performance for daily use.");
 
   // Scroll to top automatically
   useEffect(() => {
@@ -40,15 +40,14 @@ export default function CatalogPage({ type }: CatalogPageProps) {
     <section className="py-24 px-4 bg-obsidian-black relative min-h-screen">
       <div className="max-w-7xl mx-auto relative z-10">
         
-        <div className="flex flex-col md:flex-row justify-between items-end mb-12">
-          <div>
-            <h2 className="text-3xl md:text-5xl font-black tracking-tight text-white mb-2 uppercase">
-              {title}
-            </h2>
-            <p className="text-zinc-400">
-              {desc}
-            </p>
-          </div>
+        <div className="flex flex-col justify-center items-center text-center mb-16 pb-12 border-b border-[#BB00FF]/20 shadow-[0_4px_30px_rgba(187,0,255,0.03)] relative">
+          <div className="absolute bottom-[-1px] left-1/2 -translate-x-1/2 w-32 h-[1px] bg-[#BB00FF] shadow-[0_0_15px_rgba(187,0,255,1)]" />
+          <h2 className="text-4xl md:text-5xl font-black tracking-[0.15em] text-white mb-4 uppercase drop-shadow-[0_0_15px_rgba(187,0,255,0.2)]">
+            {title}
+          </h2>
+          <p className="text-[#A1A1AA] font-mono tracking-[0.2em] uppercase text-sm max-w-2xl">
+            {desc}
+          </p>
         </div>
 
         {loading && (

@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import MainDropHero from './components/MainDropHero';
+import BrandManifesto from './components/BrandManifesto';
 
 import Footer from './components/Footer';
 import CartDrawer from './components/CartDrawer';
@@ -81,6 +82,7 @@ function RouterApp() {
                 />
                 <main>
                   <MainDropHero />
+                  <BrandManifesto lang={lang} />
                 </main>
                 <Footer lang={lang} />
               </div>

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { ShoppingBag, ArrowLeft, Ruler, ShieldCheck, Wind, ChevronLeft, ChevronRight } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ShoppingBag, ArrowLeft, Ruler, ShieldCheck, Wind, ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { useProductDetail } from '../hooks/useProductDetail';
 import { useCartStore } from '../store/useCartStore';
 import type { Lang } from '../types';
@@ -27,6 +27,7 @@ export default function ProductDetailPage({ lang }: { lang: Lang }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const sizes = ['S', 'M', 'L', 'XL'] as const;
   const [selectedSize, setSelectedSize] = useState<typeof sizes[number]>('M');
+  const [isSizeGuideOpen, setSizeGuideOpen] = useState(false);
 
   // Scroll to top on mount
   useEffect(() => {
@@ -236,14 +237,27 @@ export default function ProductDetailPage({ lang }: { lang: Lang }) {
               </div>
             </div>
 
-            <div className="prose prose-invert prose-p:text-[#A1A1AA] prose-p:leading-relaxed mb-8 text-base sm:text-lg">
-              <p>{product.description}</p>
+            <div className="mb-10">
+              <h3 className="text-sm font-bold uppercase tracking-widest text-white mb-3">
+                {lang === 'es' ? 'Detalles del Producto' : 'Product Details'}
+              </h3>
+              <div className="prose prose-invert prose-p:text-zinc-400 prose-p:leading-[1.9] text-base sm:text-lg">
+                <p>{product.description}</p>
+              </div>
             </div>
 
             {/* Interactive Size Selector */}
-            <div className="mb-10">
-              <div className="text-xs text-[#A1A1AA] font-mono tracking-widest uppercase mb-3 drop-shadow-sm">
-                {lang === 'es' ? 'Seleccionar Talla' : 'Select Size'}
+            <div className="mb-12">
+              <div className="flex justify-between items-end mb-4">
+                <div className="text-xs text-[#A1A1AA] font-mono tracking-widest uppercase drop-shadow-sm">
+                  {lang === 'es' ? 'Seleccionar Talla' : 'Select Size'}
+                </div>
+                <button 
+                  onClick={() => setSizeGuideOpen(true)}
+                  className="text-xs text-zinc-500 hover:text-white underline font-mono tracking-wider transition-colors"
+                >
+                  {lang === 'es' ? 'Guía de Tallas (Ecuador)' : 'Size Guide'}
+                </button>
               </div>
               <div className="flex gap-4">
                 {sizes.map((s) => (
@@ -264,18 +278,83 @@ export default function ProductDetailPage({ lang }: { lang: Lang }) {
             {/* High-End Purple Gradient Add to Cart Button */}
             <button
               onClick={handleAddToCart}
-              className="w-full sm:w-auto px-8 py-5 mt-2 bg-gradient-to-r from-[#BB00FF] to-[#8800FF] text-white font-black uppercase tracking-[0.2em] hover:from-[#d033ff] hover:to-[#a033ff] transition-all duration-300 active:scale-95 rounded-sm shadow-[0_0_30px_rgba(187,0,255,0.3)] hover:shadow-[0_0_40px_rgba(187,0,255,0.5)] flex items-center justify-center gap-3"
+              className="w-full sm:w-auto px-8 py-5 mt-2 bg-gradient-to-r from-[#BB00FF] to-[#8800FF] text-white font-black uppercase tracking-[0.2em] hover:from-[#d033ff] hover:to-[#a033ff] transition-all duration-300 active:scale-95 rounded-sm shadow-[0_0_30px_rgba(187,0,255,0.4)] hover:shadow-[0_0_40px_rgba(187,0,255,0.6)] flex items-center justify-center gap-3"
             >
               <ShoppingBag size={20} />
               {lang === 'es' ? 'Añadir al Carrito' : 'Add to Cart'}
             </button>
+            <div className="mt-4 text-center sm:text-left text-xs font-mono tracking-widest text-[#A1A1AA] uppercase flex items-center justify-center sm:justify-start gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#BB00FF] shadow-[0_0_8px_rgba(187,0,255,0.8)] animate-pulse" />
+              {lang === 'es' ? 'Envíos a todo Ecuador' : 'SHIPS TO ALL ECUADOR'}
+            </div>
 
-            <p className="text-center mt-6 text-xs text-zinc-600 font-mono">
-              {lang === 'es' ? 'Envío seguro a nivel mundial.' : 'Secure global shipping.'}
-            </p>
+            {/* Technical Specs Array */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-12 pt-8 border-t border-zinc-900 w-full">
+              <div className="flex flex-col gap-2">
+                <ShieldCheck size={20} className="text-[#BB00FF] mb-1" />
+                <span className="text-xs uppercase tracking-widest font-bold text-white">Premium Leather</span>
+                <span className="text-xs text-zinc-500 font-mono">Cabretta Grade-A</span>
+              </div>
+              <div className="flex flex-col gap-2">
+                <Wind size={20} className="text-[#BB00FF] mb-1" />
+                <span className="text-xs uppercase tracking-widest font-bold text-white">Climate Control</span>
+                <span className="text-xs text-zinc-500 font-mono">Micro-fiber thermal lining</span>
+              </div>
+              <div className="flex flex-col gap-2">
+                <Ruler size={20} className="text-[#BB00FF] mb-1" />
+                <span className="text-xs uppercase tracking-widest font-bold text-white">True Fit</span>
+                <span className="text-xs text-zinc-500 font-mono">Ergonomic tactical silhouette</span>
+              </div>
+            </div>
+
           </motion.div>
         </div>
       </div>
+
+      {/* Sizing Modal Overlay */}
+      <AnimatePresence>
+        {isSizeGuideOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" onClick={() => setSizeGuideOpen(false)}>
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: -10 }}
+              onClick={(e) => e.stopPropagation()}
+              className="w-full max-w-lg bg-[#0a0a0a] border border-[#181818] rounded-sm p-8 shadow-[0_0_50px_rgba(187,0,255,0.15)] relative overflow-hidden"
+            >
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#BB00FF] to-[#8800FF]" />
+              <button 
+                onClick={() => setSizeGuideOpen(false)}
+                className="absolute top-6 right-6 text-zinc-500 hover:text-white transition-colors"
+                aria-label="Close modal"
+              >
+                <X size={20} />
+              </button>
+              <h2 className="text-2xl font-black uppercase tracking-widest mb-2 text-white">
+                {lang === 'es' ? 'Guía de Tallas' : 'Size Guide'} <span className="text-[#BB00FF]">Ecuador</span>
+              </h2>
+              <p className="text-zinc-400 font-mono text-xs sm:text-sm mb-6 border-b border-[#181818] pb-4">
+                {lang === 'es' ? 'Mide la circunferencia de tu mano para un ajuste perfecto.' : 'Measure your hand circumference for a perfect fit.'}
+              </p>
+              <div className="flex flex-col gap-1 font-mono text-xs sm:text-sm">
+                <div className="flex justify-between py-2 border-b border-zinc-900 text-zinc-500 mb-2">
+                  <span>{lang === 'es' ? 'TALLA (US)' : 'SIZE (US)'}</span>
+                  <span>{lang === 'es' ? 'LONGITUD DE MANO' : 'HAND LENGTH'}</span>
+                </div>
+                <div className="flex justify-between py-3 border-b border-zinc-900/50 text-white"><span className="font-bold text-zinc-300">XXS (5)</span><span>137 mm</span></div>
+                <div className="flex justify-between py-3 border-b border-zinc-900/50 text-white"><span className="font-bold text-zinc-300">XS (6)</span><span>152 mm</span></div>
+                <div className="flex justify-between py-3 border-b border-zinc-900/50 text-white"><span className="font-bold text-zinc-300">S (7)</span><span>178 mm</span></div>
+                <div className="flex justify-between py-3 border-b border-zinc-900/50 text-[#BB00FF] bg-[#BB00FF]/5 -mx-4 px-4 rounded-sm"><span className="font-bold text-white">M (8) - {lang === 'es' ? 'Promedio' : 'Average'}</span><span className="text-white">203 mm</span></div>
+                <div className="flex justify-between py-3 border-b border-zinc-900/50 text-white"><span className="font-bold text-zinc-300">L (9)</span><span>229 mm</span></div>
+                <div className="flex justify-between py-3 border-b border-zinc-900/50 text-white"><span className="font-bold text-zinc-300">XL (10)</span><span>254 mm</span></div>
+                <div className="flex justify-between py-3 border-b border-zinc-900/50 text-white"><span className="font-bold text-zinc-300">XXL (11)</span><span>279 mm</span></div>
+                <div className="flex justify-between py-3 text-white"><span className="font-bold text-zinc-300">XXXL (12)</span><span>295 mm</span></div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
     </div>
   );
 }
