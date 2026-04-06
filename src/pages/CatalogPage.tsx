@@ -79,7 +79,7 @@ export default function CatalogPage({ type }: CatalogPageProps) {
           {filteredProducts.map((glove: Glove) => (
             <div key={glove.id} className="group relative glass rounded-xl overflow-hidden hover:border-[#8A2BE2]/50 transition-colors">
               
-              <Link to={`/product/${glove.slug}`} className="block aspect-square bg-zinc-900/50 relative overflow-hidden flex items-center justify-center p-8 group-hover:bg-zinc-900/80 transition-colors">
+              <Link to={`/product/${glove.id}`} className="block aspect-square bg-zinc-900/50 relative overflow-hidden flex items-center justify-center p-8 group-hover:bg-zinc-900/80 transition-colors">
                 <div className="absolute inset-0 bg-gradient-to-tr from-[#8A2BE2]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                 <img 
                   src={getDisplayImage(glove)} 
@@ -91,7 +91,7 @@ export default function CatalogPage({ type }: CatalogPageProps) {
               <div className="p-6">
                 <div className="flex justify-between items-start mb-2">
                   <h3 className="text-lg font-bold text-white leading-tight">
-                    <Link to={`/product/${glove.slug}`} className="hover:text-[#8A2BE2] transition-colors">
+                    <Link to={`/product/${glove.id}`} className="hover:text-[#8A2BE2] transition-colors">
                       {glove.name}
                     </Link>
                   </h3>
