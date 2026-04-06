@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CreditCard, Truck, ChevronLeft, Lock, Loader2 } from 'lucide-react';
 import { useCartStore } from '../store/useCartStore';
+import api from '../api/axios';
 import { useAuthStore } from '../store/useAuthStore';
 import CouponInput from '../components/CouponInput';
 import type { Lang } from '../types';
@@ -58,21 +59,11 @@ export default function Checkout({ lang, onBack, onSuccess }: CheckoutProps) {
     const token = localStorage.getItem('token') || localStorage.getItem('access_token');
 
     try {
-      const res = await fetch(`${baseURL}/api/orders/create/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
-        },
-        body: JSON.stringify(payload)
-      });
+      const res = await api.post('/orders/create/', payload);
 
-      if (!res.ok) {
-        throw new Error('Transaction declined. Server rejected credentials.');
-      }
-
-      clearCart();
-      if (onSuccess) onSuccess();
+      const data = res.data;
+      
+      clearCart(); onSuccess();
       navigate('/dashboard'); 
     } catch (err: any) {
       setError(err.message);

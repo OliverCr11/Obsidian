@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Loader2, Tag } from 'lucide-react';
 import { useCartStore } from '../store/useCartStore';
+import api from '../api/axios';
 
 const baseURL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
 
@@ -20,14 +21,8 @@ export default function CouponInput() {
     setMessage(null);
 
     try {
-      const res = await fetch(`${baseURL}/api/orders/apply-coupon/`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code: code.trim().toUpperCase() })
-      });
-      
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Invalid code');
+      const res = await api.post('/orders/apply-coupon/', { code: code.trim().toUpperCase() });
+      const data = res.data;
       
       applyDiscount({
         code: data.code,

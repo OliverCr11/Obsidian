@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ShieldCheck, XCircle, Loader2 } from 'lucide-react';
 import type { Lang } from '../types';
+import api from '../api/axios';
 
 const baseURL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
 
@@ -17,19 +18,12 @@ export default function VerifyEmailPage({ lang }: { lang: Lang }) {
 
     const verifyEmail = async () => {
       try {
-        const res = await fetch(`${baseURL}/api/auth/verify/${token}/`);
-        const data = await res.json();
-        
-        if (res.ok) {
-          setStatus('success');
-          setMessage(lang === 'es' ? 'Cuenta verificada exitosamente.' : 'Account verified successfully.');
-        } else {
-          setStatus('error');
-          setMessage(data.error || data.message || (lang === 'es' ? 'Token inválido o expirado.' : 'Invalid or expired token.'));
-        }
-      } catch (err) {
+        await api.get(`/auth/verify/${token}/`);
+        setStatus('success');
+        setMessage(lang === 'es' ? 'Cuenta verificada exitosamente.' : 'Account verified successfully.');
+      } catch (err: any) {
         setStatus('error');
-        setMessage(lang === 'es' ? 'Error de conexión HTTP.' : 'HTTP Connection error.');
+        setMessage(err.response?.data?.error || err.response?.data?.message || (lang === 'es' ? 'Token inválido o expirado.' : 'Invalid or expired token.'));
       }
     };
 

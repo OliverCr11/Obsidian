@@ -86,15 +86,15 @@ export default function MainDropHero() {
 
   return (
     <div className="relative w-full min-h-[90vh] bg-[#000000] border-b border-[#181818] flex items-center justify-center overflow-hidden px-6 lg:px-20 py-20 font-sans">
-      
+
       {/* Background Visual Noise */}
       <div className="absolute inset-0 z-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.02),transparent_70%)] pointer-events-none" />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-8 items-center max-w-7xl w-full z-10 relative">
-        
+
         {/* Left Content Area */}
         <div className="flex flex-col items-start gap-8 z-20">
-          
+
           {/* Badges */}
           <div className="flex flex-wrap gap-4">
             <span className="inline-block px-3 py-1 bg-[#00FFAA]/10 border border-[#00FFAA]/40 text-[#00FFAA] text-xs font-bold tracking-[0.2em] rounded-sm">
@@ -113,19 +113,19 @@ export default function MainDropHero() {
               {data.hero_marketing_description || data.description}
             </p>
           </div>
-          
+
           {/* Action Row */}
           <div className="w-full flex flex-col gap-6 items-start mt-2">
             <Countdown targetDate={data.countdown_target_date} />
             <div className="flex flex-col sm:flex-row gap-4 items-center w-full">
-              <button 
+              <button
                 onClick={handleAddToCart}
                 className="px-8 py-5 bg-gradient-to-r from-[#BB00FF] to-[#8800FF] text-white font-black uppercase tracking-[0.2em] hover:from-[#d033ff] hover:to-[#a033ff] transition-all duration-300 active:scale-95 rounded-sm shadow-[0_0_30px_rgba(187,0,255,0.4)] w-full sm:w-auto text-center"
               >
                 PRE-ORDENAR AHORA - ${parseFloat(data.price).toFixed(2)}
               </button>
-              
-              <button 
+
+              <button
                 onClick={() => navigate(`/product/${data.id}`)}
                 className="text-zinc-400 hover:text-white uppercase tracking-widest text-xs font-bold underline transition-colors"
               >
@@ -137,9 +137,9 @@ export default function MainDropHero() {
 
         {/* Right Parallax Image Wrapper */}
         <div className="relative flex justify-center items-center h-full min-h-[400px]">
-           {/* Abstract aesthetic circle behind the main image */}
+          {/* Abstract aesthetic circle behind the main image */}
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 lg:w-96 lg:h-96 rounded-full border border-[#181818] pointer-events-none" />
-          
+
           <motion.div
             style={{ x, y, rotateX, rotateY, z: 100 }}
             drag
@@ -150,12 +150,12 @@ export default function MainDropHero() {
             onMouseLeave={handleMouseLeave}
             className="relative cursor-grab w-full max-w-md z-10 p-8 flex items-center justify-center transition-all duration-300 ease-out"
           >
-            <motion.img 
-               src={data.image_url} 
-               alt={data.name} 
-               className="w-full h-auto object-contain filter drop-shadow-[0_0_60px_rgba(187,0,255,0.5)] transition-all duration-500"
-               draggable="false"
-               whileHover={{ scale: 1.05 }}
+            <motion.img
+              src={data.image_url}
+              alt={data.name}
+              className="w-full h-auto object-contain filter drop-shadow-[0_0_60px_rgba(187,0,255,0.5)] transition-all duration-500"
+              draggable="false"
+              whileHover={{ scale: 1.05 }}
             />
           </motion.div>
         </div>

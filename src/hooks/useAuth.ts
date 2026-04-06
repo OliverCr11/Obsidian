@@ -4,7 +4,6 @@ import { useAuthStore } from '../store/useAuthStore';
 import api from '../api/axios';
 
 const baseURL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
-const API_BASE = `${baseURL}/api`;
 
 export function useAuth() {
   const [loading, setLoading] = useState(false);

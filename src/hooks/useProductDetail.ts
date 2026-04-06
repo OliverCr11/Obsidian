@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import type { Glove } from '../types';
-
-const baseURL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
+import api from '../api/axios';
 
 export function useProductDetail(id: string | undefined) {
   const [product, setProduct] = useState<Glove | null>(null);
@@ -18,20 +17,16 @@ export function useProductDetail(id: string | undefined) {
     const fetchProduct = async () => {
       setLoading(true);
       try {
-        const response = await fetch(`${baseURL}/api/products/${id}/`);
-        
-        if (!response.ok) {
-          if (response.status === 404) {
-            throw new Error('Product not found');
-          }
-          throw new Error('Failed to fetch product details');
-        }
-        
-        const data = await response.json();
+        const response = await api.get(`/products/${id}/`);
+        const data = response.data;
         setProduct(data);
         setError(null);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'An unexpected error occurred');
+      } catch (err: any) {
+        if (err.response?.status === 404) {
+          setError('Product not found');
+        } else {
+          setError(err.message || 'An unexpected error occurred');
+        }
       } finally {
         setLoading(false);
       }
