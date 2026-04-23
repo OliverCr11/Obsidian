@@ -77,7 +77,7 @@ export default function ShopSection({ lang }: ShopSectionProps) {
                 <div className="absolute inset-0 bg-gradient-to-tr from-kevin-violet/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                 <img 
                   src={getDisplayImage(glove)} 
-                  alt={glove.name}
+                  alt={lang === 'es' ? glove.name_es || glove.name : glove.name_en || glove.name}
                   className="w-full h-full object-contain filter drop-shadow-xl group-hover:scale-105 transition-transform duration-500"
                 />
               </Link>
@@ -87,7 +87,7 @@ export default function ShopSection({ lang }: ShopSectionProps) {
                 <div className="flex justify-between items-start mb-2">
                   <h3 className="text-lg font-bold text-white leading-tight">
                     <Link to={`/product/${glove.id}`} className="hover:text-kevin-violet transition-colors">
-                      {glove.name}
+                      {lang === 'es' ? glove.name_es || glove.name : glove.name_en || glove.name}
                     </Link>
                   </h3>
                   <span className="text-kevin-violet font-mono font-bold">
@@ -96,7 +96,7 @@ export default function ShopSection({ lang }: ShopSectionProps) {
                 </div>
                 
                 <p className="text-sm text-zinc-400 mb-6 line-clamp-2">
-                  {glove.description || (lang === 'es' ? 'Sin descripción' : 'No description available')}
+                  {lang === 'es' ? glove.description_es || glove.description : glove.description_en || glove.description || 'No description available'}
                 </p>
 
                 <div className="flex items-center justify-between mb-6">
@@ -115,8 +115,8 @@ export default function ShopSection({ lang }: ShopSectionProps) {
                   onClick={() => {
                     addItem({
                       id: `db-glove-${glove.id}`,
-                      name: glove.name,
-                      nameEs: glove.name, // Simplified for dynamic API data
+                      name: lang === 'es' ? glove.name_es || glove.name : glove.name_en || glove.name,
+                      nameEs: glove.name_es || glove.name, // Simplified for dynamic API data
                       price: parseFloat(glove.price),
                       image: getDisplayImage(glove),
                       size: glove.size,

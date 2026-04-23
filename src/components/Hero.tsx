@@ -159,8 +159,8 @@ export default function Hero({ lang }: HeroProps) {
                 onClick={() => {
                   addItem({
                     id: dropProduct ? `db-drop-${dropProduct.id}` : 'obd-lot-001',
-                    name: dropProduct ? dropProduct.name : "Founder's Glove — Lot 001",
-                    nameEs: dropProduct ? dropProduct.name : 'Guante Fundador — Lote 001',
+                    name: dropProduct ? (lang === 'es' ? dropProduct.name_es || dropProduct.name : dropProduct.name_en || dropProduct.name) : "Founder's Glove — Lot 001",
+                    nameEs: dropProduct ? (dropProduct.name_es || dropProduct.name) : 'Guante Fundador — Lote 001',
                     price: dropProduct ? parseFloat(dropProduct.price) : 150,
                     image: getDisplayImage(dropProduct),
                     size: dropProduct ? dropProduct.size : 'M',
@@ -207,7 +207,7 @@ export default function Hero({ lang }: HeroProps) {
             <div className="absolute top-10 left-0 md:left-10 glass rounded-lg px-4 py-2 border border-emerald-500/30">
               <span className="text-white text-[10px] font-mono font-bold tracking-[0.2em] uppercase flex items-center gap-2">
                 <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
-                {dropProduct ? `${dropProduct.stock} LEFT` : t(lang, 'hero.limit.badge')}
+                {dropProduct ? `${dropProduct.stock} ${lang === 'es' ? 'DISPONIBLES' : 'LEFT'}` : t(lang, 'hero.limit.badge')}
               </span>
             </div>
 

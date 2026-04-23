@@ -4,19 +4,31 @@ import { useNavigate } from 'react-router-dom';
 import api from '../api/axios';
 import { useCartStore } from '../store/useCartStore';
 
+import type { Lang } from '../types';
+
 interface HeroData {
   id: string | number;
   name: string;
+  name_es?: string;
+  name_en?: string;
   description: string;
+  description_es?: string;
+  description_en?: string;
   price: string;
   hero_title_over_the_product: string;
+  hero_title_over_the_product_es?: string;
+  hero_title_over_the_product_en?: string;
   hero_marketing_description: string;
+  hero_marketing_description_es?: string;
+  hero_marketing_description_en?: string;
   limited_drop_info_text: string;
+  limited_drop_info_text_es?: string;
+  limited_drop_info_text_en?: string;
   countdown_target_date: string;
   image_url: string;
 }
 
-export default function MainDropHero() {
+export default function MainDropHero({ lang }: { lang: Lang }) {
   const [data, setData] = useState<HeroData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -29,8 +41,8 @@ export default function MainDropHero() {
     if (!data) return;
     addItem({
       id: String(data.id),
-      name: data.name,
-      nameEs: data.name,
+      name: lang === 'es' ? data.name_es || data.name : data.name_en || data.name,
+      nameEs: data.name_es || data.name,
       price: parseFloat(data.price),
       image: data.image_url,
       size: 'M',
@@ -98,19 +110,19 @@ export default function MainDropHero() {
           {/* Badges */}
           <div className="flex flex-wrap gap-4">
             <span className="inline-block px-3 py-1 bg-[#00FFAA]/10 border border-[#00FFAA]/40 text-[#00FFAA] text-xs font-bold tracking-[0.2em] rounded-sm">
-              {data.limited_drop_info_text || "DROP 001 ACTIVO"}
+              {lang === 'es' ? data.limited_drop_info_text_es || data.limited_drop_info_text : data.limited_drop_info_text_en || data.limited_drop_info_text || "DROP 001 ACTIVO"}
             </span>
             <span className="inline-block px-3 py-1 bg-white/5 border border-white/20 text-white text-xs font-bold tracking-[0.2em] rounded-sm">
-              AUTENTICIDAD VERIFICADA
+              {lang === 'es' ? 'AUTENTICIDAD VERIFICADA' : 'AUTHENTICITY VERIFIED'}
             </span>
           </div>
 
           <div className="space-y-4">
             <h1 className="text-5xl lg:text-7xl font-sans font-black uppercase text-white tracking-tighter leading-none" style={{ textShadow: '0 0 20px rgba(255,255,255,0.2)' }}>
-              {data.hero_title_over_the_product || data.name}
+              {lang === 'es' ? data.hero_title_over_the_product_es || data.hero_title_over_the_product || data.name : data.hero_title_over_the_product_en || data.hero_title_over_the_product || data.name}
             </h1>
             <p className="text-zinc-400 text-lg max-w-md font-light leading-relaxed">
-              {data.hero_marketing_description || data.description}
+              {lang === 'es' ? data.hero_marketing_description_es || data.hero_marketing_description || data.description : data.hero_marketing_description_en || data.hero_marketing_description || data.description}
             </p>
           </div>
 
@@ -122,14 +134,14 @@ export default function MainDropHero() {
                 onClick={handleAddToCart}
                 className="px-8 py-5 bg-gradient-to-r from-[#BB00FF] to-[#8800FF] text-white font-black uppercase tracking-[0.2em] hover:from-[#d033ff] hover:to-[#a033ff] transition-all duration-300 active:scale-95 rounded-sm shadow-[0_0_30px_rgba(187,0,255,0.4)] w-full sm:w-auto text-center"
               >
-                PRE-ORDENAR AHORA - ${parseFloat(data.price).toFixed(2)}
+                {lang === 'es' ? 'PRE-ORDENAR AHORA' : 'PRE-ORDER NOW'} - ${parseFloat(data.price).toFixed(2)}
               </button>
 
               <button
                 onClick={() => navigate(`/product/${data.id}`)}
                 className="text-zinc-400 hover:text-white uppercase tracking-widest text-xs font-bold underline transition-colors"
               >
-                Ver Detalles
+                {lang === 'es' ? 'Ver Detalles' : 'View Details'}
               </button>
             </div>
           </div>

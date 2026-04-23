@@ -105,8 +105,8 @@ export default function ProductDetailPage({ lang }: { lang: Lang }) {
   const handleAddToCart = () => {
     addItem({
       id: `db-pdp-${product.id}-${selectedSize}`,
-      name: product.name,
-      nameEs: product.name,
+      name: lang === 'es' ? product.name_es || product.name : product.name_en || product.name,
+      nameEs: product.name_es || product.name,
       price: parseFloat(product.price.toString()),
       image: images.length > 0 ? getImageUrl(images[currentIndex].image) : '/images/hero_glove.png',
       size: selectedSize,
@@ -230,7 +230,7 @@ export default function ProductDetailPage({ lang }: { lang: Lang }) {
                 </div>
               )}
               <h1 className="text-5xl sm:text-7xl font-black uppercase tracking-tighter mb-4 leading-[0.9] text-white">
-                {product.name}
+                {lang === 'es' ? product.name_es || product.name : product.name_en || product.name}
               </h1>
               <div className="text-3xl font-mono font-bold text-white tracking-wider">
                 ${parseFloat(product.price.toString()).toFixed(2)}
@@ -242,7 +242,7 @@ export default function ProductDetailPage({ lang }: { lang: Lang }) {
                 {lang === 'es' ? 'Detalles del Producto' : 'Product Details'}
               </h3>
               <div className="prose prose-invert prose-p:text-zinc-400 prose-p:leading-[1.9] text-base sm:text-lg">
-                <p>{product.description}</p>
+                <p>{lang === 'es' ? product.description_es || product.description : product.description_en || product.description}</p>
               </div>
             </div>
 

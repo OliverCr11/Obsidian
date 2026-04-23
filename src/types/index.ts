@@ -25,9 +25,13 @@ export interface ProductImage {
 export interface Glove {
   id: number;
   name: string;
+  name_es?: string;
+  name_en?: string;
   slug: string;
   description: string;
-  price: string; // Django DecimalField is serialized as string
+  description_es?: string;
+  description_en?: string;
+  price: string;
   stock: number;
   images: ProductImage[];
   size: 'S' | 'M' | 'L' | 'XL';

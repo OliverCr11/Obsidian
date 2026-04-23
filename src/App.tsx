@@ -81,7 +81,7 @@ function RouterApp() {
                   onOpenAuth={() => navigate('/dashboard')} 
                 />
                 <main>
-                  <MainDropHero />
+                  <MainDropHero lang={lang} />
                   <BrandManifesto lang={lang} />
                 </main>
                 <Footer lang={lang} />
