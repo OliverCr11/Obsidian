@@ -66,7 +66,11 @@ export default function Checkout({ lang, onBack, onSuccess }: CheckoutProps) {
       clearCart(); onSuccess();
       navigate('/dashboard'); 
     } catch (err: any) {
-      setError(err.message);
+      if (err.response?.status === 401 || err.response?.status === 403) {
+        setError(lang === 'es' ? 'Su sesión expiró. Inicie sesión nuevamente.' : 'Session expired. Please log in again.');
+      } else {
+        setError(err.response?.data?.detail || err.message || (lang === 'es' ? 'Hubo un error procesando su orden.' : 'Error processing your order.'));
+      }
     } finally {
       setIsSubmitting(false);
     }

@@ -16,8 +16,15 @@ const api = axios.create({
 
 // Request Interceptor: Automatically attach the token to every request
 api.interceptors.request.use((config: any) => {
-    const token = localStorage.getItem('token') || localStorage.getItem('access_token');
-    if (token) {
+    let token = null;
+    try {
+        const authData = localStorage.getItem('obsidian-auth-core');
+        if (authData) {
+            token = JSON.parse(authData).state?.token;
+        }
+    } catch (e) {}
+    
+    if (token && token !== 'undefined' && token !== 'null') {
         config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
