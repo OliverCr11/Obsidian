@@ -36,7 +36,7 @@ export default function Navbar({ lang, onToggleLang, onOpenAuth }: NavbarProps) 
             OBSIDIAN
           </span>
           <span className="hidden sm:inline-block text-[10px] text-kevin-base font-mono tracking-widest border border-[#8A2BE2]/40 px-1.5 py-0.5 rounded text-[#8A2BE2]">
-            APP
+            BETA
           </span>
         </Link>
 

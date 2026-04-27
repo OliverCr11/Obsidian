@@ -155,16 +155,18 @@ export default function Hero({ lang }: HeroProps) {
             {/* CTA Button */}
             <div className="pt-6">
               <button
-                disabled={loading || (dropProduct ? dropProduct.stock <= 0 : false)}
+                disabled={loading || !dropProduct || dropProduct.stock <= 0}
                 onClick={() => {
+                  if (!dropProduct) return;
                   addItem({
-                    id: dropProduct ? `db-drop-${dropProduct.id}` : 'obd-lot-001',
-                    name: dropProduct ? (lang === 'es' ? dropProduct.name_es || dropProduct.name : dropProduct.name_en || dropProduct.name) : "Founder's Glove — Lot 001",
-                    nameEs: dropProduct ? (dropProduct.name_es || dropProduct.name) : 'Guante Fundador — Lote 001',
-                    price: dropProduct ? parseFloat(dropProduct.price) : 150,
-                    image: getDisplayImage(dropProduct),
-                    size: dropProduct ? dropProduct.size : 'M',
-                    variant: 'One Size / Carbon Black',
+                    id: `db-drop-${dropProduct.id}`,
+                    name: lang === 'es' ? dropProduct.name_es || dropProduct.name : dropProduct.name_en || dropProduct.name,
+                    nameEs: dropProduct.name_es || dropProduct.name,
+                    price: Number(dropProduct.price),
+                    quantity: 1,
+                    image: dropProduct.images?.[0]?.image_url || '/images/hero_glove.png',
+                    size: 'M',
+                    variant: `Talla M / ${dropProduct.name}`
                   });
                   openCart();
                 }}

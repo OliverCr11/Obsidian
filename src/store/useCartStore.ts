@@ -52,18 +52,7 @@ export const useCartStore = create<CartStore>()(
   persist(
     (set, get) => ({
       // ── Initial state ────────────────────────────────────────
-      cartItems: [
-        {
-          id: 'obd-glove-001-m',
-          name: "Founder's Glove — Drop 001",
-          nameEs: 'Guante Fundador — Lote 001',
-          price: 120,
-          quantity: 1,
-          image: '/images/hero_glove.png',
-          size: 'M',
-          variant: 'Talla M / Carbon Black',
-        },
-      ],
+      cartItems: [],
       isOpen: false,
       discount: null,
 
