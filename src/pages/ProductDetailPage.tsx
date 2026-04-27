@@ -72,11 +72,11 @@ export default function ProductDetailPage({ lang }: { lang: Lang }) {
             {lang === 'es' ? 'Registro borrado o enlace inactivo.' : 'Registry purged or link inactive.'}
           </p>
           <button
-            onClick={() => navigate('/catalog')}
+            onClick={() => navigate(-1)}
             className="flex items-center gap-2 justify-center w-full py-4 rounded-sm bg-zinc-900 border border-zinc-700 text-white font-bold hover:bg-zinc-800 transition-colors"
           >
             <ArrowLeft size={16} />
-            {lang === 'es' ? 'VOLVER AL CATÁLOGO' : 'BACK TO CATALOG'}
+            {lang === 'es' ? 'VOLVER' : 'GO BACK'}
           </button>
         </div>
       </div>
@@ -121,11 +121,11 @@ export default function ProductDetailPage({ lang }: { lang: Lang }) {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <button
-          onClick={() => navigate('/catalog')}
+          onClick={() => navigate(-1)}
           className="flex items-center gap-2 text-zinc-500 hover:text-white transition-colors uppercase font-mono tracking-widest text-xs mb-12 group"
         >
           <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" />
-          {lang === 'es' ? 'VOLVER AL CATÁLOGO' : 'BACK TO CATALOG'}
+          {lang === 'es' ? 'VOLVER' : 'GO BACK'}
         </button>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 relative z-10 w-full">
