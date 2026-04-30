@@ -292,18 +292,30 @@ export default function ProductDetailPage({ lang }: { lang: Lang }) {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-12 pt-8 border-t border-zinc-900 w-full">
               <div className="flex flex-col gap-2">
                 <ShieldCheck size={20} className="text-[#BB00FF] mb-1" />
-                <span className="text-xs uppercase tracking-widest font-bold text-white">Premium Leather</span>
-                <span className="text-xs text-zinc-500 font-mono">Cabretta Grade-A</span>
+                <span className="text-xs uppercase tracking-widest font-bold text-white">
+                  {lang === 'es' ? 'Cuero Premium' : 'Premium Leather'}
+                </span>
+                <span className="text-xs text-zinc-500 font-mono">
+                  {lang === 'es' ? 'Cabretta Grado A' : 'Cabretta Grade-A'}
+                </span>
               </div>
               <div className="flex flex-col gap-2">
                 <Wind size={20} className="text-[#BB00FF] mb-1" />
-                <span className="text-xs uppercase tracking-widest font-bold text-white">Climate Control</span>
-                <span className="text-xs text-zinc-500 font-mono">Micro-fiber thermal lining</span>
+                <span className="text-xs uppercase tracking-widest font-bold text-white">
+                  {lang === 'es' ? 'Control Climático' : 'Climate Control'}
+                </span>
+                <span className="text-xs text-zinc-500 font-mono">
+                  {lang === 'es' ? 'Forro térmico de microfibra' : 'Micro-fiber thermal lining'}
+                </span>
               </div>
               <div className="flex flex-col gap-2">
                 <Ruler size={20} className="text-[#BB00FF] mb-1" />
-                <span className="text-xs uppercase tracking-widest font-bold text-white">True Fit</span>
-                <span className="text-xs text-zinc-500 font-mono">Ergonomic tactical silhouette</span>
+                <span className="text-xs uppercase tracking-widest font-bold text-white">
+                  {lang === 'es' ? 'Ajuste Perfecto' : 'True Fit'}
+                </span>
+                <span className="text-xs text-zinc-500 font-mono">
+                  {lang === 'es' ? 'Silueta táctica ergonómica' : 'Ergonomic tactical silhouette'}
+                </span>
               </div>
             </div>
 
