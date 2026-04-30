@@ -426,13 +426,13 @@ export default function AuthPage({ lang, onBack }: AuthPageProps) {
                   </button>
 
                   {/* Divider */}
+                  {/* Google OAuth Disabled for Beta v1.0
                   <div className="flex items-center gap-3 my-1">
                     <div className="flex-1 h-px bg-zinc-800" />
                     <span className="text-zinc-600 text-xs font-mono">OR</span>
                     <div className="flex-1 h-px bg-zinc-800" />
                   </div>
 
-                  {/* Google */}
                   <button
                     type="button"
                     className="w-full flex items-center justify-center gap-3 py-3.5 rounded-lg border border-zinc-800 bg-zinc-900/50 hover:bg-zinc-800/60 hover:border-zinc-700 text-sm font-medium text-zinc-300 transition-all duration-200"
@@ -440,6 +440,7 @@ export default function AuthPage({ lang, onBack }: AuthPageProps) {
                     <GoogleIcon />
                     {c.google}
                   </button>
+                  */}
                 </form>
 
                 {/* Switch to register */}
@@ -563,13 +564,13 @@ export default function AuthPage({ lang, onBack }: AuthPageProps) {
                   </button>
 
                   {/* Divider */}
+                  {/* Google OAuth Disabled for Beta v1.0
                   <div className="flex items-center gap-3 my-1">
                     <div className="flex-1 h-px bg-zinc-800" />
                     <span className="text-zinc-600 text-xs font-mono">OR</span>
                     <div className="flex-1 h-px bg-zinc-800" />
                   </div>
 
-                  {/* Google */}
                   <button
                     type="button"
                     className="w-full flex items-center justify-center gap-3 py-3.5 rounded-lg border border-zinc-800 bg-zinc-900/50 hover:bg-zinc-800/60 hover:border-zinc-700 text-sm font-medium text-zinc-300 transition-all duration-200"
@@ -577,6 +578,7 @@ export default function AuthPage({ lang, onBack }: AuthPageProps) {
                     <GoogleIcon />
                     {c.google}
                   </button>
+                  */}
                 </form>
 
                 {/* Switch to login */}

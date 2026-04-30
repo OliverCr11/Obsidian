@@ -1,7 +1,5 @@
 import { useState, useEffect } from 'react';
-
-const baseURL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
-const API_BASE = `${baseURL}/api`;
+import api from '../api/axios';
 
 export interface OrderItem {
   id: number;
@@ -28,32 +26,15 @@ export function useOrders() {
 
   useEffect(() => {
     const fetchOrders = async () => {
-      // The explicit strict LocalStorage token interception requirement
-      const token = localStorage.getItem('token') || localStorage.getItem('access_token');
-      
-      if (!token) {
-        setLoading(false);
-        setError("Not authenticated.");
-        return;
-      }
-
       try {
-        const res = await fetch(`${API_BASE}/orders/my-orders/`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          }
-        });
-
-        if (!res.ok) {
-          throw new Error('Failed to fetch structural order history');
-        }
-
-        const data = await res.json();
-        setOrders(data);
+        const res = await api.get('/orders/my-orders/');
+        setOrders(res.data);
       } catch (err: any) {
-        setError(err.message || "Network isolation failure.");
+        if (err.response?.status === 401) {
+          setError("Session expired. Please log in again.");
+        } else {
+          setError("FAILED TO FETCH STRUCTURAL ORDER HISTORY");
+        }
       } finally {
         setLoading(false);
       }

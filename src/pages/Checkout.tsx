@@ -75,11 +75,11 @@ function CheckoutFormInternal({ lang, onBack, onSuccess }: CheckoutProps) {
     const city = formData.get('city') as string;
     const zip = formData.get('zip') as string;
 
-    if (!firstName?.trim() || !lastName?.trim()) return "First and Last name are required.";
-    if (!email?.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return "Please provide a valid email address.";
-    if (!address?.trim()) return "Street Address is required.";
-    if (!city?.trim()) return "City is required.";
-    if (!zip?.trim()) return "ZIP Code is required.";
+    if (!firstName?.trim() || !lastName?.trim()) return lang === 'es' ? "Nombre y Apellido son obligatorios." : "First and Last name are required.";
+    if (!email?.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return lang === 'es' ? "Por favor proporcione un correo válido." : "Please provide a valid email address.";
+    if (!address?.trim()) return lang === 'es' ? "La dirección es obligatoria." : "Street Address is required.";
+    if (!city?.trim()) return lang === 'es' ? "La ciudad es obligatoria." : "City is required.";
+    if (!zip?.trim()) return lang === 'es' ? "El código postal es obligatorio." : "ZIP Code is required.";
     
     return null;
   };
@@ -120,7 +120,7 @@ function CheckoutFormInternal({ lang, onBack, onSuccess }: CheckoutProps) {
       const { client_secret } = intentRes.data;
 
       const cardElement = elements.getElement(CardElement);
-      if (!cardElement) throw new Error("Stripe Form rendering failed.");
+      if (!cardElement) throw new Error(lang === 'es' ? "Error al renderizar el formulario de Stripe." : "Stripe Form rendering failed.");
 
       // 2. Confirm Payment via Stripe
       const { error: stripeError, paymentIntent } = await stripe.confirmCardPayment(client_secret, {
@@ -139,7 +139,7 @@ function CheckoutFormInternal({ lang, onBack, onSuccess }: CheckoutProps) {
       });
 
       if (stripeError) {
-        throw new Error(stripeError.message || "Payment declined by issuing bank.");
+        throw new Error(stripeError.message || (lang === 'es' ? "Pago declinado por el banco emisor." : "Payment declined by issuing bank."));
       }
 
       if (paymentIntent && paymentIntent.status === 'succeeded') {
@@ -166,16 +166,23 @@ function CheckoutFormInternal({ lang, onBack, onSuccess }: CheckoutProps) {
           <div className="w-20 h-20 bg-kevin-violet/20 rounded-full flex items-center justify-center mb-6">
             <CheckCircle2 size={40} className="text-kevin-violet" />
           </div>
-          <h2 className="text-2xl font-black text-white font-mono tracking-widest uppercase mb-2">Transmission Confirmed</h2>
+          <h2 className="text-2xl font-black text-white font-mono tracking-widest uppercase mb-2">
+            {lang === 'es' ? 'Transmisión Confirmada' : 'Transmission Confirmed'}
+          </h2>
           <p className="text-zinc-400 mb-8 max-w-[80%] leading-relaxed text-sm">
-            Operation successful. Secure instructions and tracking payload have been dispatched to <span className="text-white font-semibold">{successOrder.email}</span>.
+            {lang === 'es' 
+              ? <>Operación exitosa. Instrucciones de seguridad y el paquete de seguimiento han sido enviados a <span className="text-white font-semibold">{successOrder.email}</span>.</>
+              : <>Operation successful. Secure instructions and tracking payload have been dispatched to <span className="text-white font-semibold">{successOrder.email}</span>.</>
+            }
           </p>
           <div className="w-full bg-[#09090B] border border-zinc-800/80 rounded-xl p-6 mb-8 text-left">
-            <p className="text-xs text-zinc-500 uppercase tracking-widest font-mono mb-1">Order Identifier</p>
+            <p className="text-xs text-zinc-500 uppercase tracking-widest font-mono mb-1">
+              {lang === 'es' ? 'Identificador de Orden' : 'Order Identifier'}
+            </p>
             <p className="text-kevin-violet font-mono text-lg">{successOrder.order_id?.split('-')[0].toUpperCase()}</p>
           </div>
           <button onClick={() => navigate('/dashboard')} className="w-full py-4 text-sm font-bold uppercase tracking-widest text-[#E4E4E7] bg-white/5 hover:bg-white/10 rounded-xl transition-all font-mono border border-zinc-700">
-            Access The Vault
+            {lang === 'es' ? 'Acceder a la Bóveda' : 'Access The Vault'}
           </button>
         </div>
       </div>
@@ -194,7 +201,7 @@ function CheckoutFormInternal({ lang, onBack, onSuccess }: CheckoutProps) {
           <ChevronLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
           {lang === 'es' ? 'Volver al carrito' : 'Back to cart'}
         </button>
-        <h1 className="text-3xl font-black text-white tracking-tight">Checkout</h1>
+        <h1 className="text-3xl font-black text-white tracking-tight">{lang === 'es' ? 'Checkout' : 'Checkout'}</h1>
       </div>
 
       <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-start">
@@ -207,21 +214,21 @@ function CheckoutFormInternal({ lang, onBack, onSuccess }: CheckoutProps) {
             <div>
               <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-3">
                 <span className="w-7 h-7 rounded-full bg-kevin-violet/20 border border-kevin-violet/40 flex items-center justify-center text-kevin-violet text-xs font-mono shadow-[0_0_10px_rgba(138,43,226,0.2)]">1</span>
-                Contact Information
+                {lang === 'es' ? 'Información de Contacto' : 'Contact Information'}
               </h2>
               <div className="space-y-5">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                   <div className="space-y-2">
-                    <label className="text-xs font-mono text-zinc-400 uppercase tracking-widest">First Name</label>
+                    <label className="text-xs font-mono text-zinc-400 uppercase tracking-widest">{lang === 'es' ? 'Nombre' : 'First Name'}</label>
                     <input name="firstName" type="text" required className="w-full bg-[#09090B] border border-zinc-800 text-[#E4E4E7] placeholder:text-zinc-600 px-4 py-3 rounded-lg focus:border-[#8A2BE2] focus:outline-none focus:ring-0 focus:shadow-[0_0_10px_rgba(138,43,226,0.3)] transition-all" defaultValue={user?.name?.split(' ')[0] || ''} placeholder="Kevin" />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-xs font-mono text-zinc-400 uppercase tracking-widest">Last Name</label>
+                    <label className="text-xs font-mono text-zinc-400 uppercase tracking-widest">{lang === 'es' ? 'Apellido' : 'Last Name'}</label>
                     <input name="lastName" type="text" required className="w-full bg-[#09090B] border border-zinc-800 text-[#E4E4E7] placeholder:text-zinc-600 px-4 py-3 rounded-lg focus:border-[#8A2BE2] focus:outline-none focus:ring-0 focus:shadow-[0_0_10px_rgba(138,43,226,0.3)] transition-all" defaultValue={user?.name?.split(' ').slice(1).join(' ') || ''} placeholder="Smith" />
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-xs font-mono text-zinc-400 uppercase tracking-widest">Email Address</label>
+                  <label className="text-xs font-mono text-zinc-400 uppercase tracking-widest">{lang === 'es' ? 'Correo Electrónico' : 'Email Address'}</label>
                   <input name="email" type="email" required className="w-full bg-[#09090B] border border-zinc-800 text-[#E4E4E7] placeholder:text-zinc-600 px-4 py-3 rounded-lg focus:border-[#8A2BE2] focus:outline-none focus:ring-0 focus:shadow-[0_0_10px_rgba(138,43,226,0.3)] transition-all" defaultValue={user?.email || ''} placeholder="you@example.com" />
                 </div>
               </div>
@@ -233,21 +240,21 @@ function CheckoutFormInternal({ lang, onBack, onSuccess }: CheckoutProps) {
             <div>
               <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-3">
                 <span className="w-7 h-7 rounded-full bg-kevin-violet/20 border border-kevin-violet/40 flex items-center justify-center text-kevin-violet text-xs font-mono shadow-[0_0_10px_rgba(138,43,226,0.2)]">2</span>
-                Shipping Address
+                {lang === 'es' ? 'Dirección de Envío' : 'Shipping Address'}
                 <Truck size={18} className="ml-auto text-zinc-500" />
               </h2>
               <div className="space-y-5">
                 <div className="space-y-2">
-                  <label className="text-xs font-mono text-zinc-400 uppercase tracking-widest">Street Address</label>
+                  <label className="text-xs font-mono text-zinc-400 uppercase tracking-widest">{lang === 'es' ? 'Dirección' : 'Street Address'}</label>
                   <input name="address" type="text" required className="w-full bg-[#09090B] border border-zinc-800 text-[#E4E4E7] placeholder:text-zinc-600 px-4 py-3 rounded-lg focus:border-[#8A2BE2] focus:outline-none focus:ring-0 focus:shadow-[0_0_10px_rgba(138,43,226,0.3)] transition-all" placeholder="123 Performance Ave" />
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                   <div className="space-y-2 md:col-span-2">
-                    <label className="text-xs font-mono text-zinc-400 uppercase tracking-widest">City</label>
+                    <label className="text-xs font-mono text-zinc-400 uppercase tracking-widest">{lang === 'es' ? 'Ciudad' : 'City'}</label>
                     <input name="city" type="text" required className="w-full bg-[#09090B] border border-zinc-800 text-[#E4E4E7] placeholder:text-zinc-600 px-4 py-3 rounded-lg focus:border-[#8A2BE2] focus:outline-none focus:ring-0 focus:shadow-[0_0_10px_rgba(138,43,226,0.3)] transition-all" placeholder="Quito" />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-xs font-mono text-zinc-400 uppercase tracking-widest">ZIP</label>
+                    <label className="text-xs font-mono text-zinc-400 uppercase tracking-widest">{lang === 'es' ? 'C. Postal' : 'ZIP'}</label>
                     <input name="zip" type="text" required className="w-full bg-[#09090B] border border-zinc-800 text-[#E4E4E7] placeholder:text-zinc-600 px-4 py-3 rounded-lg focus:border-[#8A2BE2] focus:outline-none focus:ring-0 focus:shadow-[0_0_10px_rgba(138,43,226,0.3)] transition-all font-mono" placeholder="170102" />
                   </div>
                 </div>
@@ -260,12 +267,12 @@ function CheckoutFormInternal({ lang, onBack, onSuccess }: CheckoutProps) {
             <div>
               <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-3">
                 <span className="w-7 h-7 rounded-full bg-kevin-violet/20 border border-kevin-violet/40 flex items-center justify-center text-kevin-violet text-xs font-mono shadow-[0_0_10px_rgba(138,43,226,0.2)]">3</span>
-                Payment
+                {lang === 'es' ? 'Pago' : 'Payment'}
               </h2>
 
               {/* Stripe-like Unified Input */}
               <div className="mt-4">
-                <label className="text-xs font-mono text-zinc-400 uppercase tracking-widest block mb-3">Card Information</label>
+                <label className="text-xs font-mono text-zinc-400 uppercase tracking-widest block mb-3">{lang === 'es' ? 'Información de Tarjeta' : 'Card Information'}</label>
                 
                 <div className="bg-[#09090B] border border-zinc-800 rounded-lg overflow-hidden flex flex-col focus-within:border-kevin-violet focus-within:shadow-[0_0_10px_rgba(138,43,226,0.3)] transition-all p-4">
                   <CardElement options={{
@@ -293,10 +300,10 @@ function CheckoutFormInternal({ lang, onBack, onSuccess }: CheckoutProps) {
                 <div className="flex justify-between items-center mt-3">
                   <div className="flex items-center gap-1.5 text-zinc-500 text-[10px] uppercase font-mono tracking-widest">
                     <Lock size={12} className="text-[#8A2BE2]/70" />
-                    <span>Secured by Stripe</span>
+                    <span>{lang === 'es' ? 'Seguro por Stripe' : 'Secured by Stripe'}</span>
                   </div>
                   <div className="text-[10px] text-zinc-600 font-mono tracking-widest bg-zinc-900/50 px-2 py-0.5 rounded border border-zinc-800/50">
-                    TEST MODE
+                    {lang === 'es' ? 'MODO PRUEBA' : 'TEST MODE'}
                   </div>
                 </div>
               </div>
@@ -316,10 +323,10 @@ function CheckoutFormInternal({ lang, onBack, onSuccess }: CheckoutProps) {
               {isSubmitting ? (
                 <>
                   <Loader2 size={20} className="animate-spin" />
-                  PROCESSING TRANSACTION...
+                  {lang === 'es' ? 'PROCESANDO TRANSACCIÓN...' : 'PROCESSING TRANSACTION...'}
                 </>
               ) : (
-                <span className="font-mono">PAY ${total.toFixed(2)} USD</span>
+                <span className="font-mono">{lang === 'es' ? `PAGAR $${total.toFixed(2)} USD` : `PAY $${total.toFixed(2)} USD`}</span>
               )}
             </button>
 
@@ -329,7 +336,7 @@ function CheckoutFormInternal({ lang, onBack, onSuccess }: CheckoutProps) {
         {/* ─── RIGHT: Order Summary ─── */}
         <div className="lg:col-span-5 sticky top-8">
           <div className="glass p-6 md:p-8 rounded-2xl border border-zinc-800/50">
-            <h2 className="text-xl font-bold text-white mb-6">Order Summary</h2>
+            <h2 className="text-xl font-bold text-white mb-6">{lang === 'es' ? 'Resumen de Orden' : 'Order Summary'}</h2>
             
             {/* Cart Items */}
             <div className="space-y-4 mb-6 scrollbar-hide max-h-[40vh] overflow-y-auto pr-2">
@@ -342,14 +349,14 @@ function CheckoutFormInternal({ lang, onBack, onSuccess }: CheckoutProps) {
                     <h4 className="text-sm font-bold text-white truncate">{lang === 'es' ? item.nameEs : item.name}</h4>
                     {item.variant && <p className="text-xs text-zinc-500 truncate mt-0.5">{item.variant}</p>}
                     <div className="flex items-center justify-between mt-1">
-                      <span className="text-xs text-zinc-400">Qty: {item.quantity}</span>
+                      <span className="text-xs text-zinc-400">{lang === 'es' ? 'Cant:' : 'Qty:'} {item.quantity}</span>
                       <span className="text-sm font-mono font-bold text-white">${item.price.toFixed(2)}</span>
                     </div>
                   </div>
                 </div>
               ))}
               {items.length === 0 && (
-                <p className="text-zinc-500 text-sm italic">Your cart is empty.</p>
+                <p className="text-zinc-500 text-sm italic">{lang === 'es' ? 'Su carrito está vacío.' : 'Your cart is empty.'}</p>
               )}
             </div>
 
@@ -358,29 +365,29 @@ function CheckoutFormInternal({ lang, onBack, onSuccess }: CheckoutProps) {
             {/* Totals */}
             <div className="space-y-3 font-mono text-sm">
               <div className="mb-6">
-                <CouponInput />
+                <CouponInput lang={lang} />
               </div>
               <div className="flex justify-between text-zinc-400">
-                <span>Subtotal ({totalItems} items)</span>
+                <span>{lang === 'es' ? `Subtotal (${totalItems} artículos)` : `Subtotal (${totalItems} items)`}</span>
                 <span className="text-white">${subtotal.toFixed(2)}</span>
               </div>
               
               {discountAmount > 0 && (
                 <div className="flex justify-between text-[#39FF14]">
-                  <span>Discount ({discount?.code})</span>
+                  <span>{lang === 'es' ? `Descuento (${discount?.code})` : `Discount (${discount?.code})`}</span>
                   <span>-${discountAmount.toFixed(2)}</span>
                 </div>
               )}
               
               <div className="flex justify-between text-zinc-400">
-                <span>Shipping Base Rate</span>
+                <span>{lang === 'es' ? 'Tarifa de Envío' : 'Shipping Base Rate'}</span>
                 <span className="text-white">${items.length > 0 ? SHIPPING_RATE.toFixed(2) : '0.00'}</span>
               </div>
               
               <div className="h-px bg-zinc-800/30 my-4" />
               
               <div className="flex justify-between items-center">
-                <span className="text-white font-bold text-base">Total</span>
+                <span className="text-white font-bold text-base">{lang === 'es' ? 'Total' : 'Total'}</span>
                 <div className="text-right">
                   <span className="text-kevin-glow font-black text-2xl">${total.toFixed(2)}</span>
                   <span className="text-zinc-500 text-xs ml-1">USD</span>
