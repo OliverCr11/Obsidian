@@ -90,7 +90,9 @@ export default function UserDashboard({ lang, onBack }: UserDashboardProps) {
           <ArrowLeft size={20} />
         </button>
         <div className="text-white font-black tracking-[0.2em] text-sm">OBSIDIAN</div>
-        <div className="w-8" />
+        <button onClick={logout} className="p-2 -mr-2 text-red-500/70 hover:text-red-400 transition-colors">
+          <LogOut size={20} />
+        </button>
       </div>
 
       {/* ─── Sidebar ─── */}
@@ -309,6 +311,13 @@ export default function UserDashboard({ lang, onBack }: UserDashboardProps) {
                 <Settings size={48} className="text-[#8A2BE2] mb-4 opacity-50" />
                 <h3 className="text-xl font-bold tracking-widest uppercase text-white mb-2">{t.settings}</h3>
                 <p className="text-zinc-500 font-mono text-xs max-w-md">// VAULT CONFIGURATIONS LOCKED</p>
+                <button 
+                  onClick={logout}
+                  className="md:hidden mt-8 flex items-center gap-2 px-6 py-3 border border-red-900/30 text-red-500/80 hover:text-red-400 hover:bg-red-900/10 rounded-xl transition-all uppercase tracking-widest text-xs font-bold"
+                >
+                  <LogOut size={16} />
+                  {t.logout}
+                </button>
               </div>
             )}
           </motion.div>
