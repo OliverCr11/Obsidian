@@ -57,8 +57,8 @@ The platform operates on a strictly separated headless architecture:
 ## Gallery
 
 <div align="center">
-  <img src="./assets/Hero.jpg" alt="Hero Section" width="48%" />
-  <img src="./assets/Product-Details.jpg" alt="Product Details" width="48%" />
+  <img src="./assets/Hero.png" alt="Hero Section" width="48%" />
+  <img src="./assets/Product-Details.png" alt="Product Details" width="48%" />
 </div>
 <br/>
 <div align="center">
